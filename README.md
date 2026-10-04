@@ -4,7 +4,8 @@
 > 已交付：**D1 補助動詞（20 型）＋ D2 接続表現（116 条）**的单文件课件
 > （和語エンジン解説＋JLPT 真题命中＋六层题库）。
 
-- 成品：`index.html`（单文件、离线可用、内嵌 TTS）
+- 线上：**https://syu-toutousai.github.io/wago-atlas/**（单文件离线可用）
+- 成品：`index.html`（内嵌 408 段 TTS，12MB）
 - 数据：`data/hojodoushi.json`（D1 20）・`data/setsuzoku.json`（D2 116）・
   `data/dimensions.json`（维度目录）・`data/exams/*.json`（真题命中，带出典）
 - 数据源：本地真题库 `../jlpt-question-bank/`（N2-N5）＋ `../jlpt-n1-question-bank/`（N1）
