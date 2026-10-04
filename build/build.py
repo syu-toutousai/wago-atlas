@@ -8,6 +8,7 @@ TTS: edge-tts, 音声は audio/ に内容アドレスでキャッシュ。単フ
 import base64
 import copy
 import hashlib
+import importlib.util
 import json
 import random
 import re
@@ -15,6 +16,10 @@ import subprocess
 import sys
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+
+_obs_spec = importlib.util.spec_from_file_location("observe", Path(__file__).parent / "observe.py")
+observe_mod = importlib.util.module_from_spec(_obs_spec)
+_obs_spec.loader.exec_module(observe_mod)
 
 ROOT = Path(__file__).parent.parent
 DATA = ROOT / "data" / "hojodoushi.json"
@@ -361,6 +366,22 @@ justify-content:space-between;align-items:baseline;margin-top:14px}
 .dimhead{font-size:17px;margin:18px 0 8px;color:var(--acc);border-left:5px solid var(--acc);
 padding-left:10px;scroll-margin-top:70px}
 .dimhead .hint{font-weight:400}
+/* observe dashboard */
+.tblwrap{overflow-x:auto}
+table.obs{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px}
+table.obs th,table.obs td{border:1px solid var(--line);padding:6px 8px;text-align:center;vertical-align:top}
+table.obs th{background:#f7f8fc;font-weight:700}
+table.obs td.dimcell{text-align:left;min-width:170px}
+table.obs td.zero{background:#fff5f5;color:#c92a2a}
+table.obs tr.totrow td{background:#f7f8fc}
+table.obs .ex{display:block;font-size:10.5px;color:var(--sub)}
+table.obs td.lm{text-align:left}
+table.obs .jpmin{font-family:"Hiragino Mincho ProN","Yu Mincho",serif}
+table.obs .resp{font-weight:700;color:var(--acc)}
+.obar-row{display:flex;align-items:center;gap:10px;margin:7px 0;font-size:13px}
+.obar{flex:1;max-width:420px;height:12px;border-radius:99px;overflow:hidden;background:#eef1f6;display:flex}
+.obar i{display:block;height:100%}
+.obar .ow{background:#188a52}.obar .ok{background:#9c36b5}.obar .om{background:#b8860b}
 .mini{background:#fff;border-radius:14px;padding:12px 10px;cursor:pointer;text-align:left;border:2px solid transparent;
 box-shadow:0 1px 6px rgba(30,40,90,.08);transition:.15s}
 .mini:hover{transform:translateY(-2px);border-color:var(--acc)}
@@ -413,8 +434,8 @@ a.jump:hover{text-decoration:underline}
 </head>
 <body>
 <header><div class="wrap">
-<h1>和語アトラス（M1+M2）</h1>
-<div class="kana">補助動詞・接続表現 —— 動詞の後ろと、文と文の間に潜む和語の文法。JLPT 真题命中付き 🌊</div>
+<h1>和語アトラス（M1+M2+M3）</h1>
+<div class="kana">補助動詞・接続表現・副詞 —— 動詞の後ろ、文と文の間、そして用言の手前に潜む和語の文法。JLPT 真题命中付き 🌊</div>
 <div class="tags">__TAGS__</div>
 </div></header>
 
@@ -434,6 +455,7 @@ const EXAMS=__EXAMS__;
 const BANKS=__BANKS__;
 const ORIGIN_COUNT=__ORIGIN_COUNT__;
 const DIMENSIONS=__DIMENSIONS__;
+const OBSERVE=__OBSERVE__;
 let QS=__QS__;
 const $=s=>document.querySelector(s);
 let curAudio=null,curBtn=null;
@@ -462,7 +484,7 @@ function examHTML(e){
 }
 
 /* ---------- tabs ---------- */
-const TABS=[["list","🗺️ 一覧"],["detail","📖 詳解"],["exams","📝 真題"],["quiz","🎯 クイズ"]];
+const TABS=[["list","🗺️ 一覧"],["detail","📖 詳解"],["exams","📝 真題"],["observe","📊 観測"],["quiz","🎯 クイズ"]];
 let tab="list";
 function renderNav(){
   $("#nav").innerHTML=TABS.map(([k,l])=>
@@ -477,13 +499,13 @@ function dimItems(dimId){return ITEMS.filter(n=>n.dim===dimId);}
 function dimList(){
   const ids=[...new Set(ITEMS.map(n=>n.dim))];
   return ids.map(id=>({id, name:(DIMENSIONS[id]||{}).name||id,
-    order:(DIMENSIONS[id]||{}).order||"", note:(DIMENSIONS[id]||{}).note||""}));
+    order:(DIMENSIONS[id]||{}).order||"", note:(DIMENSIONS[id]||{}).note||""}))
+    .sort((a,b)=>String(a.order).localeCompare(String(b.order)));
 }
 function renderList(){
   let h=`<div class="card intro"><h2>和語の文法エンジンを二層で 🌊</h2>
-  <p>M1＝<b>補助動詞</b>：動詞の後ろに付いて、試行・準備・授受・方向・徹底…を担う。
-  M2＝<b>接続表現</b>：文と文の間に立って、順接・逆接・並列・対比・説明・転換を担う。
-  どちらも<b>和語（または和語由来の機能語）</b>が文法の接着剤になる——文法化の最前線である。</p>
+  <p>M1＝<b>補助動詞</b>（動詞の後ろ）・M2＝<b>接続表現</b>（文と文の間）・M3＝<b>副詞・連用修飾</b>（用言の手前）。
+  三層とも<b>和語（または和語由来の機能語）</b>が文の調整つまみになる——文法化の最前線である。</p>
   <div class="steps">
     <div><b>① 和語が主役</b><br>見る・置く・仕舞う・呉れる…が「〜てみる／〜ておく／〜てしまう／〜てくれる」に。</div>
     <div><b>② 文法化の度合い</b><br>実語性が消えるほど機能語化。Engine 欄で「何がどう薄れたか」を確認。</div>
@@ -561,6 +583,55 @@ function renderExams(){
       h+=list.map(e=>examHTML(Object.assign({items:[n.id]},e))).join("");
     });
   });
+  $("#main").innerHTML=h;
+}
+
+/* ---------- observe (M5) ---------- */
+function renderObserve(){
+  const o=OBSERVE, lv=o.levels;
+  let h=`<div class="card intro"><h2>📊 和語アトラス観測</h2>
+  <p><b>${o.totals.dimensions}</b> 维度・<b>${o.totals.items}</b> 条目・<b>${o.totals.exams}</b> 真題命中。
+  覆盖矩阵＝维度×级别的「条目数／真题命中数」；呼応マトリクス＝陳述副詞的搭配要求；
+  空缺清单就是下一阶段的 growth backlog。</p></div>`;
+  h+=`<div class="card"><h3 class="sec">🗺️ 覆盖矩阵（条目 / 真題）</h3><div class="tblwrap"><table class="obs">
+    <tr><th>维度</th>${lv.map(x=>`<th>${x}</th>`).join("")}<th>計</th></tr>`;
+  o.dims.forEach(d=>{
+    h+=`<tr><td class="dimcell"><b>${d.order} ${d.name}</b><div class="hint">${d.note||""}</div></td>`;
+    lv.forEach(x=>{const c=d.byLevel[x];
+      h+=`<td class="${c.items?'':'zero'}">${c.items}<span class="ex">${c.exams?"/"+c.exams:""}</span></td>`;});
+    h+=`<td><b>${d.items}</b><span class="ex">/${d.exams}</span></td></tr>`;
+  });
+  h+=`<tr class="totrow"><td><b>合計</b></td>${lv.map(x=>
+    `<td><b>${o.levelTotals[x].items}</b><span class="ex">/${o.levelTotals[x].exams}</span></td>`).join("")}<td></td></tr>
+    </table></div></div>`;
+  h+=`<div class="card"><h3 class="sec">🧲 呼応マトリクス（陳述副詞 × 文末形式，${o.response.length} 条）</h3>
+    <div class="tblwrap"><table class="obs"><tr><th>副詞</th><th>級</th><th>呼応先</th><th>意味</th></tr>`;
+  o.response.forEach(r=>{
+    h+=`<tr><td class="jpmin">${r.word}</td><td>${r.level}</td><td class="resp">${r.response}</td><td class="lm">${r.meaning}</td></tr>`;
+  });
+  h+=`</table></div></div>`;
+  h+=`<div class="card"><h3 class="sec">🌡️ 語種比（和／漢／混）・文法化ラダー</h3>`;
+  o.dims.forEach(d=>{
+    const t=(d.origins.wago+d.origins.kango+d.origins.mixed)||1;
+    h+=`<div class="obar-row"><b>${d.order}</b>
+      <div class="obar"><i class="ow" style="width:${d.origins.wago/t*100}%"></i>
+      <i class="ok" style="width:${d.origins.kango/t*100}%"></i>
+      <i class="om" style="width:${d.origins.mixed/t*100}%"></i></div>
+      <span class="hint">和 ${d.origins.wago}・漢 ${d.origins.kango}・混 ${d.origins.mixed}</span></div>`;
+  });
+  h+=`<div class="hint" style="margin-top:8px">実語 → 機能語の阶梯：`+
+     o.dims.map(d=>`${d.order} ${d.name}（${d.items}）`).join(" ▸ ")+`</div></div>`;
+  if(o.future.length){
+    h+=`<div class="card"><h3 class="sec">🗓️ ロードマップ（未収録维度）</h3>`+
+      o.future.map(d=>`<div class="srcrow"><b>${d.order} ${d.name}</b> <span class="hint">${d.note||""}</span></div>`).join("")+
+      `</div>`;
+  }
+  h+=`<div class="card"><h3 class="sec">🕳️ 空缺清单（覆盖矩阵中的 0，growth backlog）</h3>`;
+  if(o.gaps.length){
+    const byDim={};o.gaps.forEach(g=>{(byDim[g.order+" "+g.dimName]=byDim[g.order+" "+g.dimName]||[]).push(g.level);});
+    h+=Object.entries(byDim).map(([k,v])=>`<div class="srcrow"><b>${k}</b>：缺 ${v.join("・")}</div>`).join("");
+  }else{h+=`<div class="hint">全部维度 N5-N1 均有条目。</div>`;}
+  h+=`</div>`;
   $("#main").innerHTML=h;
 }
 
@@ -662,6 +733,7 @@ function render(){
   if(tab==="list")renderList();
   else if(tab==="detail")renderDetail();
   else if(tab==="exams")renderExams();
+  else if(tab==="observe")renderObserve();
   else renderQuizTab();
 }
 renderNav();render();
@@ -710,6 +782,7 @@ def main():
     html = (TEMPLATE
             .replace("__TAGS__", tags)
             .replace("__DIMENSIONS__", j(dimensions))
+            .replace("__OBSERVE__", j(observe_mod.compute(dimensions, items, exams)))
             .replace("__AUDIO__", j(audio))
             .replace("__ITEMS__", j(display))
             .replace("__EXAMS__", j(excopy))
