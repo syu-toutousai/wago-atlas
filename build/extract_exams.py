@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
-"""Extract real JLPT exam sentences containing each 補助動詞 from the local
-N1-N5 question banks (with source attribution).
+"""Extract real JLPT exam sentences containing each item of every dimension.
 
-Output: data/exams/hojodoushi.json  {type_id: [{id, level, source, jp, answer_text}]}
+Reads all data/*.json (except dimensions.json), uses item["match"] if given,
+else a pattern derived from item["word"]; items with extract=false are skipped.
+Scans the local N1-N5 banks and writes data/exams/<dimension>.json:
+    {item_id: [{id, level, source, jp, answer_text}, ...]}  (max 8 each)
 """
 import json
 import re
@@ -16,16 +18,17 @@ BANKS = {
     "n4": Path("/home/naruto/scratch/jlpt-question-bank/past-exams/n4"),
     "n5": Path("/home/naruto/scratch/jlpt-question-bank/past-exams/n5"),
 }
-OUT = ROOT / "data" / "exams" / "hojodoushi.json"
+MAX_PER_ITEM = 8
 
-PATTERNS = {
+# hand-tuned patterns for M1（word からの導出より精密）
+OVERRIDES = {
     "te-miru": r"[てで]み(?:る|た|て|ます|よう|ろ)",
     "te-oku": r"てお(?:く|い|き|こ)",
     "te-shimau": r"てしま(?:う|っ|い|わ)|ちゃ(?:う|っ|い)|じゃ(?:う|っ|い)",
     "te-iru": r"てい(?:る|た|ます|て)",
     "te-aru": r"てあ(?:る|り|っ)",
     "te-kuru": r"てく(?:る|き|こ|れ)|てき(?:た|て|ます)",
-    "te-iku": r"ていく|ていき|ていこ|ていった|いってしま",
+    "te-iku": r"ていく|ていき|ていこ|ていった",
     "te-kureru": r"てくれ(?:る|た|て|な)|てくださ(?:る|い|っ)",
     "te-morau": r"てもら(?:う|っ|い|え|お)|ていただ(?:く|い|き|け)",
     "te-ageru": r"てあげ(?:る|た|て)|てさしあげ",
@@ -40,7 +43,29 @@ PATTERNS = {
     "kakeru": r"言いかけ|読みかけ|書きかけ|やりかけ|食べかけ|死にかけ|話しかけ|問いかけ|投げかけ|呼びかけ",
     "naosu": r"書き直|描き直|やり直|立て直|見直|読み直|考え直|作り直",
 }
-COMPILED = {k: re.compile(v) for k, v in PATTERNS.items()}
+
+
+def word_pattern(word):
+    """Turn a display word like 〜けれど（も）／〜けど into a safe regex."""
+    w = word.replace("〜", "")
+    parts = re.split(r"[・／/、]", w)
+    out = []
+    for p in parts:
+        p = p.strip()
+        if not p:
+            continue
+        tokens = re.split(r"(（[^）]*）)", p)
+        seg = ""
+        for t in tokens:
+            if t.startswith("（") and t.endswith("）"):
+                inner = t[1:-1]
+                alts = "|".join(re.escape(x) for x in re.split(r"[／/]", inner) if x)
+                seg += f"(?:{alts})?" if alts else ""
+            else:
+                seg += re.escape(t)
+        if seg:
+            out.append(seg)
+    return "|".join(out)
 
 
 def sentences(text, pat, max_len=160):
@@ -57,77 +82,66 @@ def sentences(text, pat, max_len=160):
     return out
 
 
-def collect_exam(d, level):
-    text = (d.get("question") or "")
-    opts = d.get("options") or []
-    answer = d.get("answer")
-    ans_text = ""
-    if isinstance(answer, int) and 0 <= answer < len(opts):
-        ans_text = opts[answer]
-    return {
-        "id": d.get("id", ""),
-        "level": level,
-        "source": d.get("source", ""),
-        "stem": text if len(text) <= 220 else text[:220] + "…",
-        "answer_text": ans_text,
-        "options": opts[:4],
-    }
-
-
 def main():
-    found = {k: [] for k in PATTERNS}
-    seen = {k: set() for k in PATTERNS}
-    for level, root in BANKS.items():
-        if not root.exists():
+    data_dir = ROOT / "data"
+    exam_dir = data_dir / "exams"
+    exam_dir.mkdir(parents=True, exist_ok=True)
+    for df in sorted(data_dir.glob("*.json")):
+        if df.name in ("dimensions.json",):
             continue
-        files = list(root.glob("**/*.json"))
-        for f in files:
-            try:
-                d = json.loads(f.read_text(encoding="utf-8"))
-            except Exception:
+        data = json.loads(df.read_text(encoding="utf-8"))
+        items = data.get("items") or []
+        if not items:
+            continue
+        found = {it["id"]: [] for it in items}
+        seen = {it["id"]: set() for it in items}
+        compiled = {}
+        for it in items:
+            if it.get("extract") is False:
+                compiled[it["id"]] = None
                 continue
-            if not isinstance(d, dict):
+            pat = it.get("match") or OVERRIDES.get(it["id"]) or word_pattern(it["word"])
+            compiled[it["id"]] = re.compile(pat) if pat else None
+
+        for level, root in BANKS.items():
+            if not root.exists():
                 continue
-            blob_q = d.get("question") or d.get("stem") or ""
-            if not blob_q:
-                continue
-            rec = None
-            for tid, pat in COMPILED.items():
-                hits = [s for s in sentences(blob_q, pat) if f"{level}:{s}" not in seen[tid]]
-                if not hits:
+            for f in root.glob("**/*.json"):
+                try:
+                    d = json.loads(f.read_text(encoding="utf-8"))
+                except Exception:
                     continue
-                if len(found[tid]) >= 8:
+                if not isinstance(d, dict):
                     continue
-                s = hits[0]
-                key = f"{level}:{s}"
-                if key in seen[tid]:
+                blob = d.get("question") or d.get("stem") or ""
+                if not blob:
                     continue
-                seen[tid].add(key)
-                if rec is None:
-                    rec = collect_exam(d, level)
-                found[tid].append({
-                    "id": rec["id"], "level": level, "source": rec["source"],
-                    "jp": s, "answer_text": rec["answer_text"],
-                })
-            # fallback: options as sentence source when stem is a bare word
-            if not rec and len(blob_q) <= 8:
-                for tid, pat in COMPILED.items():
-                    if len(found[tid]) >= 8:
+                opts = d.get("options") or []
+                ans = d.get("answer")
+                ans_text = opts[ans - 1] if isinstance(ans, int) and 0 < ans <= len(opts) else ""
+                for it in items:
+                    pat = compiled.get(it["id"])
+                    if pat is None or len(found[it["id"]]) >= MAX_PER_ITEM:
                         continue
-                    for o in d.get("options") or []:
-                        hits = sentences(o, pat)
-                        if hits and f"{level}:{hits[0]}" not in seen[tid]:
-                            seen[tid].add(f"{level}:{hits[0]}")
-                            found[tid].append({
-                                "id": d.get("id", ""), "level": level,
-                                "source": d.get("source", ""), "jp": hits[0],
-                                "answer_text": d.get("answer_text", ""),
-                            })
-                            break
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(json.dumps(found, ensure_ascii=False, indent=1), encoding="utf-8")
-    for tid in PATTERNS:
-        print(f"{tid:12} {len(found[tid])}")
+                    hits = [s for s in sentences(blob, pat) if f"{level}:{s}" not in seen[it["id"]]]
+                    if not hits and len(blob) <= 10:
+                        for o in opts:
+                            hits = sentences(o, pat)
+                            if hits:
+                                break
+                    if not hits:
+                        continue
+                    s = hits[0]
+                    seen[it["id"]].add(f"{level}:{s}")
+                    found[it["id"]].append({
+                        "id": d.get("id", ""), "level": level,
+                        "source": d.get("source", ""), "jp": s,
+                        "answer_text": ans_text or d.get("answer_text", ""),
+                    })
+        out = exam_dir / df.name
+        out.write_text(json.dumps(found, ensure_ascii=False, indent=1), encoding="utf-8")
+        total = sum(len(v) for v in found.values())
+        print(f"{df.name}: {len(items)} items, {total} exam sentences -> {out.name}")
 
 
 if __name__ == "__main__":

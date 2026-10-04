@@ -66,9 +66,32 @@ def j(obj):
 
 
 def load_data():
-    data = json.loads(DATA.read_text(encoding="utf-8"))
-    exams = json.loads(EXAMS.read_text(encoding="utf-8")) if EXAMS.exists() else {}
-    items = data["items"]
+    dimensions = {}
+    dim_file = ROOT / "data" / "dimensions.json"
+    if dim_file.exists():
+        dd = json.loads(dim_file.read_text(encoding="utf-8"))
+        for d in dd.get("dimensions", []):
+            dimensions[d["id"]] = d
+    items = []
+    for f in sorted((ROOT / "data").glob("*.json")):
+        if f.name == "dimensions.json" or f.parent.name == "exams":
+            continue
+        d = json.loads(f.read_text(encoding="utf-8"))
+        dim_id = f.stem
+        dim_name = dimensions.get(dim_id, {}).get("name", dim_id)
+        for it in d.get("items", []):
+            it = dict(it)
+            it["dim"] = dim_id
+            it["dimName"] = dim_name
+            items.append(it)
+    exams = {}
+    for f in sorted((ROOT / "data" / "exams").glob("*.json")):
+        try:
+            ed = json.loads(f.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            continue
+        for k, v in ed.items():
+            exams.setdefault(k, []).extend(v)
     errs = []
     ids = set()
     for it in items:
@@ -83,7 +106,7 @@ def load_data():
             errs.append(f"{iid} missing examples")
     if errs:
         sys.exit("[!] data errors:\n  " + "\n  ".join(errs))
-    return data, items, exams
+    return {"dimensions": dimensions, "items": items, "exams": exams}
 
 
 # ---------------------------------------------------------------- furigana
@@ -186,12 +209,36 @@ def gen_audio(items):
 
 
 # ---------------------------------------------------------------- questions
+def _word_pattern(word):
+    w = (word or "").replace("〜", "")
+    parts = re.split(r"[・／/、]", w)
+    out = []
+    for p in parts:
+        p = p.strip()
+        if not p:
+            continue
+        tokens = re.split(r"(（[^）]*）)", p)
+        seg = ""
+        for t in tokens:
+            if t.startswith("（") and t.endswith("）"):
+                inner = t[1:-1]
+                alts = "|".join(re.escape(x) for x in re.split(r"[／/]", inner) if x)
+                seg += f"(?:{alts})?" if alts else ""
+            else:
+                seg += re.escape(t)
+        if seg:
+            out.append(seg)
+    return "|".join(out)
+
+
 def blank_example(it):
     ex = (it.get("examples") or [{}])[0]
     jp = ex.get("jp", "")
-    pat = BLANKS.get(it["id"])
+    pat = BLANKS.get(it["id"]) or _word_pattern(it["word"])
     if pat:
-        return re.sub(pat, "（　）", jp, count=1)
+        out = re.sub(pat, "（　）", jp, count=1)
+        if out != jp:
+            return out
     return jp
 
 
@@ -308,6 +355,12 @@ color:var(--acc);font-size:15px;cursor:pointer;display:flex;align-items:center;j
 box-shadow:0 1px 6px rgba(30,40,90,.07)}
 .steps b{color:#0f766e}
 .mini-wrap{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;padding:12px 0 2px}
+.grp-h{background:var(--acc);color:#fff;border-radius:14px;padding:12px 16px;display:flex;
+justify-content:space-between;align-items:baseline;margin-top:14px}
+.grp-h h3{font-size:16.5px}.grp-h span{font-size:12px;opacity:.9}
+.dimhead{font-size:17px;margin:18px 0 8px;color:var(--acc);border-left:5px solid var(--acc);
+padding-left:10px;scroll-margin-top:70px}
+.dimhead .hint{font-weight:400}
 .mini{background:#fff;border-radius:14px;padding:12px 10px;cursor:pointer;text-align:left;border:2px solid transparent;
 box-shadow:0 1px 6px rgba(30,40,90,.08);transition:.15s}
 .mini:hover{transform:translateY(-2px);border-color:var(--acc)}
@@ -360,8 +413,8 @@ a.jump:hover{text-decoration:underline}
 </head>
 <body>
 <header><div class="wrap">
-<h1>補助動詞の和語レンズ</h1>
-<div class="kana">ほじょどうし —— 動詞の向こう側にある和語の文法。和語アトラス M1／JLPT 真题命中付き 🌊</div>
+<h1>和語アトラス（M1+M2）</h1>
+<div class="kana">補助動詞・接続表現 —— 動詞の後ろと、文と文の間に潜む和語の文法。JLPT 真题命中付き 🌊</div>
 <div class="tags">__TAGS__</div>
 </div></header>
 
@@ -380,6 +433,7 @@ const ITEMS=__ITEMS__;
 const EXAMS=__EXAMS__;
 const BANKS=__BANKS__;
 const ORIGIN_COUNT=__ORIGIN_COUNT__;
+const DIMENSIONS=__DIMENSIONS__;
 let QS=__QS__;
 const $=s=>document.querySelector(s);
 let curAudio=null,curBtn=null;
@@ -418,33 +472,48 @@ function goTab(k){tab=k;renderNav();render();window.scrollTo(0,0);}
 function goDetail(iid){goTab('detail');setTimeout(()=>{const el=document.getElementById('n-'+iid);if(el)el.scrollIntoView({behavior:'smooth',block:'start'});},60);}
 
 /* ---------- list ---------- */
+function shortMean(m){return m.split(/[：:；;，,（(]/)[0];}
+function dimItems(dimId){return ITEMS.filter(n=>n.dim===dimId);}
+function dimList(){
+  const ids=[...new Set(ITEMS.map(n=>n.dim))];
+  return ids.map(id=>({id, name:(DIMENSIONS[id]||{}).name||id,
+    order:(DIMENSIONS[id]||{}).order||"", note:(DIMENSIONS[id]||{}).note||""}));
+}
 function renderList(){
-  let h=`<div class="card intro"><h2>補助動詞＝和語の文法エンジン 🌊</h2>
-  <p>「食べ<b>てみる</b>」「準備し<b>ておく</b>」「忘れ<b>てしまう</b>」——動詞の後ろに付いて、
-  アスペクト・授受・方向・試行…を担う<b>和語の機能語</b>。実語（見る・置く・仕舞う）の意味が
-  薄れて文法の接着剤になる——これが<b>文法化</b>の最前線である。</p>
+  let h=`<div class="card intro"><h2>和語の文法エンジンを二層で 🌊</h2>
+  <p>M1＝<b>補助動詞</b>：動詞の後ろに付いて、試行・準備・授受・方向・徹底…を担う。
+  M2＝<b>接続表現</b>：文と文の間に立って、順接・逆接・並列・対比・説明・転換を担う。
+  どちらも<b>和語（または和語由来の機能語）</b>が文法の接着剤になる——文法化の最前線である。</p>
   <div class="steps">
-    <div><b>① 和語の動詞が主役</b><br>補助動詞は全部もと和語動詞：見る・置く・仕舞う・居る・来る・行く・呉れる・貰う・上げる…</div>
-    <div><b>② 文法化の度合い</b><br>実語性が消えるほど機能語化：「見る」→「〜てみる」は試行マーカー。</div>
-    <div><b>③ 授受は視点の問題</b><br>てくれる／てもらう／てあげるは「誰の視点で語るか」が正解の分かれ目。</div>
-    <div><b>④ 真題命中付き</b><br>📝 真題 Tab に JLPT N1-N5 の実出題文（出典付き）。各型のカードにも自動で掛かる。</div>
+    <div><b>① 和語が主役</b><br>見る・置く・仕舞う・呉れる…が「〜てみる／〜ておく／〜てしまう／〜てくれる」に。</div>
+    <div><b>② 文法化の度合い</b><br>実語性が消えるほど機能語化。Engine 欄で「何がどう薄れたか」を確認。</div>
+    <div><b>③ 真題命中付き</b><br>📝 真題 Tab に JLPT N1-N5 の実出題文（出典付き）。各条目にも自動で掛かる。</div>
+    <div><b>④ 六层题库</b><br>真題・穴埋め・意味認識・聴解三層＋錯題本。跨维度混合练习。</div>
   </div>
   <div class="hint" style="margin-top:10px">語種内訳：和語 ${ORIGIN_COUNT.wago}・漢語 ${ORIGIN_COUNT.kango}・混種 ${ORIGIN_COUNT.mixed}
-  —— 補助動詞は<b>清一色大和言葉</b>。まさに和語の文法エンジン。</div></div>`;
-  h+=`<div class="mini-wrap">`+ITEMS.map(n=>`
-    <button class="mini" onclick="goDetail('${n.id}')">
-      <div class="nm">${n.word}</div>
-      <div class="im"><span class="chip sub">${n.subtype}</span><span class="chip lv">${n.level}</span></div>
-      <div class="im" style="margin-top:4px">${shortMean(n.meaning)}</div>
-    </button>`).join("")+`</div>`;
+  ——接続表現も接続詞はほぼ和語（〜ながら・〜ので・〜のに…），漢語系（且つ・但し・因みに）は少数派。</div></div>`;
+  dimList().forEach(dim=>{
+    const members=dimItems(dim.id);
+    if(!members.length)return;
+    h+=`<div class="grp"><div class="grp-h"><h3>${dim.order} ${dim.name}</h3><span>${members.length} 条</span></div>
+    <div class="mini-wrap">${members.map(n=>`
+      <button class="mini" onclick="goDetail('${n.id}')">
+        <div class="nm">${n.word}</div>
+        <div class="im"><span class="chip sub">${n.subtype}</span><span class="chip lv">${n.level}</span></div>
+        <div class="im" style="margin-top:4px">${shortMean(n.meaning)}</div>
+      </button>`).join("")}</div></div>`;
+  });
   $("#main").innerHTML=h;
 }
-function shortMean(m){return m.split(/[：:；;，,（(]/)[0];}
 
 /* ---------- detail ---------- */
 function renderDetail(){
   let h="";
-  ITEMS.forEach(n=>{
+  dimList().forEach(dim=>{
+    const members=dimItems(dim.id);
+    if(!members.length)return;
+    h+=`<h2 class="dimhead" id="d-${dim.id}">${dim.order} ${dim.name} <span class="hint">${dim.note}</span></h2>`;
+    members.forEach(n=>{
     const iid=n.id;
     const org=n.origin||"wago";
     const orgName={wago:"和語",kango:"漢語",mixed:"混種"}[org];
@@ -464,6 +533,7 @@ function renderDetail(){
       ${(n._exams||[]).map(e=>examHTML(e)).join("")}
       ${n.note?`<div class="note">💡 ${n.note}</div>`:""}
     </div>`;
+    });
   });
   $("#main").innerHTML=h;
 }
@@ -476,16 +546,20 @@ function renderExams(){
   });
   flat.sort((a,b)=>(a.level+a.source).localeCompare(b.level+b.source));
   const nTypes=Object.keys(EXAMS).filter(k=>EXAMS[k].length).length;
-  let h=`<div class="card intro"><h2>📝 JLPT 真題コーパス（補助動詞）</h2>
-  <p>ローカルの N1-N5 真题库から、各補助動詞の実出題文を抽出（出典付き）。
-  計 ${flat.length} 句・${nTypes} 型。原文を観察して「どの動詞が機能語化しているか」を見抜く練習に。</p>
+  let h=`<div class="card intro"><h2>📝 JLPT 真題コーパス（和語アトラス）</h2>
+  <p>ローカルの N1-N5 真题库から、各条目的実出題文を抽出（出典付き）。
+  計 ${flat.length} 句・${nTypes} 条目。原文を観察して「どの和語が機能語化しているか」を見抜く練習に。</p>
   <p class="hint">JLPT 官方不公开真题；出处为公开整理站点收录，按用户判定注明出处的引用不涉版权问题。</p></div>`;
-  ITEMS.forEach(n=>{
-    const list=EXAMS[n.id]||[];
-    if(!list.length)return;
-    h+=`<h3 class="sec" style="border-left:4px solid var(--acc);padding-left:8px;color:var(--acc)">
-      ${n.word} <span class="hint">${n.subtype}｜${n.meaning}</span></h3>`;
-    h+=list.map(e=>examHTML(Object.assign({items:[n.id]},e))).join("");
+  dimList().forEach(dim=>{
+    const members=dimItems(dim.id).filter(n=>(EXAMS[n.id]||[]).length);
+    if(!members.length)return;
+    h+=`<h2 class="dimhead">${dim.order} ${dim.name} <span class="hint">${members.length} 条目命中</span></h2>`;
+    members.forEach(n=>{
+      const list=EXAMS[n.id]||[];
+      h+=`<h3 class="sec" style="border-left:4px solid var(--acc);padding-left:8px;color:var(--acc)">
+        ${n.word} <span class="hint">${n.subtype}｜${n.meaning}</span></h3>`;
+      h+=list.map(e=>examHTML(Object.assign({items:[n.id]},e))).join("");
+    });
   });
   $("#main").innerHTML=h;
 }
@@ -598,11 +672,10 @@ renderNav();render();
 
 
 def main():
-    data, items, exams = load_data()
-    meta = data.get("meta", {})
-    n_links = sum(len(v) for v in exams.values())
+    d = load_data()
+    items, exams, dimensions = d["items"], d["exams"], d["dimensions"]
     audio = gen_audio(items)
-    print(f"[2/3] questions...")
+    print("[2/3] questions...")
     qs = build_questions(items, exams, audio)
     counts = {k: sum(1 for q in qs if q["bank"] == k) for k, _ in BANK_META}
     for k, label in BANK_META:
@@ -636,6 +709,7 @@ def main():
         origins[key] = origins.get(key, 0) + 1
     html = (TEMPLATE
             .replace("__TAGS__", tags)
+            .replace("__DIMENSIONS__", j(dimensions))
             .replace("__AUDIO__", j(audio))
             .replace("__ITEMS__", j(display))
             .replace("__EXAMS__", j(excopy))
