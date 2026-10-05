@@ -21,22 +21,53 @@ BANKS = {
 MAX_PER_ITEM = 8
 
 # hand-tuned patterns for M1（word からの導出より精密）
+# STRICT: 短い機能語の誤命中（複合語・別語内部）を防ぐ境界付きパターン
+STRICT = {
+    "kedo": r"(?:だ)?けど(?=[、。！？\s「」』]|$|ね|な|よ|も)",
+    "noni": r"のに(?=[、。！？\s「」]|$|ね|な|よ|は|も|、)",
+    "node": r"(?<![そこあど])ので",
+    "deha": r"(?:^|(?<=[。！？\n]))(?!それ)では(?!な)",
+    "sorede": r"(?<!は)それで(?=[、。！？」])",
+    "sokode": r"そこで(?=[、。！？])",
+    "demo": r"(?:^|(?<=[。！？\n]))でも(?=[、。！？」])",
+    "tohaie": r"とはいえ(?!な|ま)",
+    "soreni": r"それに(?=[、。加])",
+    "katsu": r"かつ(?=[一-龯])",
+    "nao": r"(?:^|(?<=[。！？\n]))なお(?=[、。])",
+    "tokorode": r"(?:^|(?<=[。！？\n]))ところで(?=[、。])",
+    "nitsuke": r"(?:(?<=[るい])|(?<=何か))につけ(?![てこ])",
+    "gahayaika": r"が早いか(?![ら])",
+    "sonouchi": r"そのうち(?!の)",
+    "yoku": r"よく(?!ない)",
+    "tsuini": r"ついに(?!て)",
+    "samo": r"(?:^|(?<=[。！？、]))さも(?!し)",
+    "douka": r"(?:^|(?<=[。！？]))どうか(?=[、。お願])",
+    "tatoe": r"たとえ(?!ば)",
+    "mottomo": r"もっとも(?=[、。])",
+    "tsui": r"(?<!つい)(?<![き])つい(?!て|で|に|つ|た)",
+    "futo": r"(?<![一-龯])ふと(?![ん一-龯])",
+    "mou": r"(?<!いも)もう(?!と)",
+    "moshi": r"もし(?!かして)",
+    "mata": r"また(?![はも])",
+    "sate": r"さて(?=[、。])",
+    "tokini": r"ときに(?=[、。])",
+}
 OVERRIDES = {
     "te-miru": r"[てで]み(?:る|た|て|ます|よう|ろ)",
     "te-oku": r"てお(?:く|い|き|こ)",
     "te-shimau": r"てしま(?:う|っ|い|わ)|ちゃ(?:う|っ|い)|じゃ(?:う|っ|い)",
     "te-iru": r"てい(?:る|た|ます|て)",
     "te-aru": r"てあ(?:る|り|っ)",
-    "te-kuru": r"てく(?:る|き|こ|れ)|てき(?:た|て|ます)",
+    "te-kuru": r"てく(?:る|き|こ)|てき(?:た|て|ます)",
     "te-iku": r"ていく|ていき|ていこ|ていった",
     "te-kureru": r"てくれ(?:る|た|て|な)|てくださ(?:る|い|っ)",
     "te-morau": r"てもら(?:う|っ|い|え|お)|ていただ(?:く|い|き|け)",
     "te-ageru": r"てあげ(?:る|た|て)|てさしあげ",
-    "te-yaru": r"てや(?:る|っ|り|れ)",
+    "te-yaru": r"てや(?:る|り|れ|った)(?!て)(?![気方])",
     "te-miseru": r"てみせ(?:る|た|て)",
-    "hajimeru": r"[ぁ-ん]始め(?:る|た|て)|し始め|み始め|き始め|り始め|い始め",
-    "tsuzukeru": r"[ぁ-ん]続け(?:る|た|て)|し続け|み続け|き続け|り続け",
-    "owaru": r"[ぁ-ん]終わ(?:る|った|って)|し終わ|み終わ|き終わ|り終わ",
+    "hajimeru": r"[いきしちにひみりぎじびぴえけせぜてでねへめべぺ]始め(?:る|た|て)|し始め|み始め|き始め|り始め|い始め",
+    "tsuzukeru": r"[いきしちにひみりぎじびぴえけせぜてでねへめべぺ]続け(?:る|た|て)|し続け|み続け|き続け|り続け",
+    "owaru": r"[いきしちにひみりぎじびぴえけせぜてでねへめべぺ]終わ(?:る|った|って)|し終わ|み終わ|き終わ|り終わ",
     "kiru": r"使い切|疲れ切|割り切れ|踏み切|言い切|読み切|食べ切|やり切|知り切|売り切",
     "komu": r"思い込|考え込|落ち込|話し込|眠り込|座り込|飛び込|吹き込|冷え込|静まり込",
     "nuku": r"走り抜|考え抜|知り抜|やり抜|生き抜|守り抜|歌い抜|戦い抜|勝ち抜",
@@ -69,16 +100,27 @@ def word_pattern(word):
 
 
 def sentences(text, pat, max_len=160):
+    if text:
+        text = "\n".join(
+            ln for ln in text.split("\n")
+            if not re.match(r"^\s*[（(【]?(注|中略|略)", ln) and ln.strip() not in ("i", "I")
+        )
     out = []
     for s in re.split(r"(?<=[。！？])", text or ""):
         s = s.strip()
-        if s and pat.search(s) and len(s) <= max_len:
-            out.append(s)
+        if not s or not pat.search(s) or len(s) > max_len or len(s) < 6:
+            continue
+        # 空欄・並べ替えマーカーを含む断片はコーパス向けに除外
+        if re.search(r"[（(]\s*[）)]|[（(]\d{1,3}[）)]|\[\d{1,2}\]|★", s):
+            continue
+        out.append(s)
     if not out and text:
         m = pat.search(text)
         if m:
             a = max(0, m.start() - 60)
-            out.append(text[a:m.end() + 60].replace("\n", " ").strip())
+            frag = text[a:m.end() + 60].replace("\n", " ").strip()
+            if not re.search(r"[（(]\s*[）)]|\[\d{1,2}\]|★", frag):
+                out.append(frag)
     return out
 
 
@@ -86,8 +128,10 @@ def main():
     data_dir = ROOT / "data"
     exam_dir = data_dir / "exams"
     exam_dir.mkdir(parents=True, exist_ok=True)
+    block_path = data_dir / "exam_blocklist.json"
+    blocklist = json.loads(block_path.read_text(encoding="utf-8")) if block_path.exists() else {}
     for df in sorted(data_dir.glob("*.json")):
-        if df.name in ("dimensions.json",):
+        if df.name in ("dimensions.json", "exam_blocklist.json"):
             continue
         data = json.loads(df.read_text(encoding="utf-8"))
         items = data.get("items") or []
@@ -95,12 +139,16 @@ def main():
             continue
         found = {it["id"]: [] for it in items}
         seen = {it["id"]: set() for it in items}
+        bl = blocklist.get(df.stem) or []
+        if isinstance(bl, dict):
+            bl = list(bl.keys())
+        blocked = set(bl)
         compiled = {}
         for it in items:
             if it.get("extract") is False:
                 compiled[it["id"]] = None
                 continue
-            pat = it.get("match") or OVERRIDES.get(it["id"]) or word_pattern(it["word"])
+            pat = it.get("match") or STRICT.get(it["id"]) or OVERRIDES.get(it["id"]) or word_pattern(it["word"])
             compiled[it["id"]] = re.compile(pat) if pat else None
 
         for level, root in BANKS.items():
@@ -123,7 +171,8 @@ def main():
                     pat = compiled.get(it["id"])
                     if pat is None or len(found[it["id"]]) >= MAX_PER_ITEM:
                         continue
-                    hits = [s for s in sentences(blob, pat) if f"{level}:{s}" not in seen[it["id"]]]
+                    hits = [s for s in sentences(blob, pat)
+                            if s not in blocked and f"{level}:{s}" not in seen[it["id"]]]
                     if not hits and len(blob) <= 10:
                         for o in opts:
                             hits = sentences(o, pat)

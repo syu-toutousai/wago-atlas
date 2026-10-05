@@ -33,7 +33,7 @@ SEED = 20261004
 MIN_MP3 = 300
 TABS_META = [["list", "🗺️ 一覧"], ["detail", "📖 詳解"], ["exams", "📝 真題"], ["quiz", "🎯 クイズ"]]
 BANK_META = [
-    ["exam",    "📝 真題（原句）"],
+    ["exam",    "📝 真題句クイズ"],
     ["fill",    "✍️ 穴埋め"],
     ["recog",   "📘 意味認識"],
     ["listen",  "🎧 聴解判別"],
@@ -267,6 +267,26 @@ def build_questions(items, exams_by_id, audio):
                 out.append(c)
         return out
 
+    def others_dim(it, field, count=3):
+        """Distractors from the same dimension (exam quizzes stay on-topic)."""
+        own = it.get(field)
+        pool = [x[field] for x in items
+                if x["id"] != it["id"] and x.get("dim") == it.get("dim") and x.get(field) != own]
+        rng.shuffle(pool)
+        out = []
+        for c in pool:
+            if len(out) >= count:
+                break
+            if c not in out:
+                out.append(c)
+        if len(out) < count:
+            for c in others(it, field, count):
+                if c not in out:
+                    out.append(c)
+                if len(out) >= count:
+                    break
+        return out[:count]
+
     for it in items:
         iid = it["id"]
         add("recog", f"{iid}:recog",
@@ -308,10 +328,11 @@ def build_questions(items, exams_by_id, audio):
                     ans=jp_pool.index(ex0["jp"]),
                     exp=f"原句：{ex0['jp']}<br>{ex0['cn']}")
         for n, e in enumerate(exams_by_id.get(iid, [])):
-            opts = [it["word"]] + others(it, "word")
+            opts = [it["word"]] + others_dim(it, "word")
             rng.shuffle(opts)
             add("exam", f"{iid}:exam-{n}",
-                q=(f"📝 次の真題文に含まれる補助動詞は？<br><span class='jp'>{e['jp']}</span>"
+                q=(f"📝 次の JLPT 実出題文に含まれる〈{it.get('dimName', '和語')}〉は？<br>"
+                   f"<span class='jp'>{e['jp']}</span>"
                    f"<div class='hint'>{e['source']}</div>"),
                 opts=opts, ans=opts.index(it["word"]),
                 exp=f"正解：{it['word']}＝{it['meaning']}<br>出典：{e['source']}")
@@ -569,8 +590,9 @@ function renderExams(){
   flat.sort((a,b)=>(a.level+a.source).localeCompare(b.level+b.source));
   const nTypes=Object.keys(EXAMS).filter(k=>EXAMS[k].length).length;
   let h=`<div class="card intro"><h2>📝 JLPT 真題コーパス（和語アトラス）</h2>
-  <p>ローカルの N1-N5 真题库から、各条目的実出題文を抽出（出典付き）。
-  計 ${flat.length} 句・${nTypes} 条目。原文を観察して「どの和語が機能語化しているか」を見抜く練習に。</p>
+  <p>ローカルの N1-N5 真題库から、各条目的実出題文を抽出（出典付き）。計 ${flat.length} 句・${nTypes} 条目。
+  これらは<strong>実際の過去問の文</strong>で、本ページは「原文観察」用のコーパス。
+  クイズの〈真題句クイズ〉は、この実出題文に該当項目が含まれるかを問う<strong>自動生成問題</strong>（JLPT 原題そのものではない）。</p>
   <p class="hint">JLPT 官方不公开真题；出处为公开整理站点收录，按用户判定注明出处的引用不涉版权问题。</p></div>`;
   dimList().forEach(dim=>{
     const members=dimItems(dim.id).filter(n=>(EXAMS[n.id]||[]).length);
