@@ -343,10 +343,16 @@ def build_questions(items, exams_by_id, audio):
                 continue  # 无法安全挖空则不出题（语料仍在真題 Tab 展示）
             opts = [it["word"]] + others_dim(it, "word")
             rng.shuffle(opts)
+            cb = e.get("ctx_before", "")
+            ca = e.get("ctx_after", "")
+            ctxb_html = f"<div class='ctx'>{cb}</div>" if cb else ""
+            ctxa_html = f"<div class='ctx'>{ca}</div>" if ca else ""
+            hint = "" if (cb or ca) else f"<div class='hint'>ヒント（意味）：{it['meaning']}</div>"
             add("exam", f"{iid}:exam-{n}",
-                q=(f"📝 次の JLPT 実出題文の（　）に入る〈{it.get('dimName', '和語')}〉は？<br>"
-                   f"<span class='jp'>{blanked}</span>"
-                   f"<div class='hint'>{e['source']}</div>"),
+                q=(f"📝 実出題文の空欄補充〈{it.get('dimName', '和語')}〉（自動生成の穴埋め・原題そのものではない）<br>"
+                   f"{ctxb_html}<span class='jp'>{blanked}</span>{ctxa_html}"
+                   f"{hint}"
+                   f"<div class='hint'>出典：{e['source']}</div>"),
                 opts=opts, ans=opts.index(it["word"]),
                 exp=f"正解：{it['word']}＝{it['meaning']}<br>原句：{jp}<br>出典：{e['source']}")
     return qs
@@ -465,6 +471,7 @@ border-radius:10px;padding:10px 22px;font-size:15px;cursor:pointer}
 .fin .big{font-size:44px;font-weight:800;color:var(--acc)}
 .hint{font-size:12.5px;color:var(--sub);margin-top:4px;line-height:1.6}
 code.inline{background:#eceff7;border-radius:6px;padding:1px 7px;font-size:.92em}
+.exam-card .ctx,.card .ctx{font-size:13.5px;color:var(--sub);line-height:1.85;font-family:"Hiragino Mincho ProN","Yu Mincho","Noto Serif CJK JP",serif;opacity:.9;margin:2px 0}
 .exam-card{background:#fff;border-radius:14px;padding:14px 16px;margin-bottom:12px;
 box-shadow:0 2px 10px rgba(30,40,90,.06);border-left:4px solid var(--ng)}
 .exam-hdr{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px}
@@ -522,7 +529,9 @@ function rowHTML(iid,i){
 function examHTML(e){
   return `<div class="exam-card">
     <div class="exam-hdr"><span class="src src-jlpt">JLPT</span><span class="exam-src">${e.source}</span></div>
+    ${e.ctx_before?`<div class="ctx">${e.ctx_before}</div>`:""}
     <div class="jp">${e.jp}</div>
+    ${e.ctx_after?`<div class="ctx">${e.ctx_after}</div>`:""}
     ${e.answer_text?`<div class="hint">答案：${e.answer_text}</div>`:""}
     ${e.items&&e.items.length?`<div class="hint">関連：${e.items.map(id=>{const n=ITEMS.find(x=>x.id===id);
       return n?`<a class="jump" href="javascript:goDetail('${id}')">${n.word}</a>`:id;}).join("、")}</div>`:""}
@@ -620,7 +629,7 @@ function renderExams(){
   let h=`<div class="card intro"><h2>📝 JLPT 真題コーパス（和語アトラス）</h2>
   <p>ローカルの N1-N5 真題库から、各条目的実出題文を抽出（出典付き）。計 ${flat.length} 句・${nTypes} 条目。
   これらは<strong>実際の過去問の文</strong>で、本ページは「原文観察」用のコーパス。
-  クイズの〈真題句クイズ〉は、実出題文の該当箇所を空欄にした<strong>自動生成の穴埋め問題</strong>（JLPT 原題そのものではない）。</p>
+  クイズの〈真題句クイズ〉は、実出題文の該当箇所を空欄にした<strong>自動生成の穴埋め問題</strong>（JLPT 原題そのものではない）。前後の文脈を併記し、文脈が取れない場合は意味ヒントを添える。</p>
   <p class="hint">JLPT 官方不公开真题；出处为公开整理站点收录，按用户判定注明出处的引用不涉版权问题。</p></div>`;
   dimList().forEach(dim=>{
     const members=dimItems(dim.id).filter(n=>(EXAMS[n.id]||[]).length);
@@ -824,20 +833,19 @@ def main():
         for ex in it.get("examples") or []:
             ex["jp"] = add_furigana(ex["jp"])
         it["_exams"] = []
-    ex_list = []
+    for lst in excopy.values():
+        for e in lst:
+            e["jp"] = add_furigana(e["jp"])
+            e["answer_text"] = add_furigana(e.get("answer_text", ""))
+            e["ctx_before"] = add_furigana(e.get("ctx_before", ""))
+            e["ctx_after"] = add_furigana(e.get("ctx_after", ""))
     for tid, lst in excopy.items():
         for e in lst:
             e2 = dict(e)
-            e2["jp"] = add_furigana(e2["jp"])
-            e2["answer_text"] = add_furigana(e2.get("answer_text", ""))
-            e2["items"] = [tid]
-            ex_list.append(e2)
+            e2["items"] = []
             for it in display:
                 if it["id"] == tid:
                     it["_exams"].append(e2)
-    for it in display:
-        for e in it.get("_exams", []):
-            e["items"] = []
     tags = (f"<span>{len(items)} 型</span><span>{sum(len(v) for v in exams.values())} 真題句</span>"
             f"<span>{len(audio)} 音声</span><span>N5〜N1</span><span>大和言葉レンズ</span>")
     origins = {"wago": 0, "kango": 0, "mixed": 0}

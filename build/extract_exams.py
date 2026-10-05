@@ -100,29 +100,42 @@ def word_pattern(word):
     return "|".join(out)
 
 
-def sentences(text, pat, max_len=160):
+CTX_BAD = re.compile(r"選びなさい|最もよい|最も適当|記号|1・2・3・4")
+BAD_FRAG = re.compile(r"[（(]\s*[）)]|[（(]\d{1,3}[）)]|\[\d{1,2}\]|★")
+
+
+def split_sentences(text):
     if text:
         text = "\n".join(
             ln for ln in text.split("\n")
             if not re.match(r"^\s*[（(【]?(注|中略|略)", ln) and ln.strip() not in ("i", "I")
         )
+    return [s.strip() for s in re.split(r"(?<=[。！？])", text or "") if s.strip()]
+
+
+def match_sentences(slist, pat, max_len=160):
+    """Return [(idx, sentence)] of clean sentences containing pat."""
     out = []
-    for s in re.split(r"(?<=[。！？])", text or ""):
-        s = s.strip()
+    for idx, s in enumerate(slist):
         if not s or not pat.search(s) or len(s) > max_len or len(s) < 6:
             continue
         # 空欄・並べ替えマーカーを含む断片はコーパス向けに除外
-        if re.search(r"[（(]\s*[）)]|[（(]\d{1,3}[）)]|\[\d{1,2}\]|★", s):
+        if BAD_FRAG.search(s):
             continue
-        out.append(s)
-    if not out and text:
-        m = pat.search(text)
-        if m:
-            a = max(0, m.start() - 60)
-            frag = text[a:m.end() + 60].replace("\n", " ").strip()
-            if len(frag) >= 10 and not re.search(r"[（(]\s*[）)]|\[\d{1,2}\]|★", frag):
-                out.append(frag)
+        out.append((idx, s))
     return out
+
+
+def ctx_of(slist, idx, blocked):
+    """Previous/next sentence as readable context (empty when unusable)."""
+    def ok(s):
+        return (s and 6 <= len(s) <= 130 and s not in blocked
+                and not CTX_BAD.search(s) and not BAD_FRAG.search(s)
+                and not re.fullmatch(r"[\d\s・,，。、]+", s))
+    before = slist[idx - 1] if idx - 1 >= 0 else ""
+    after = slist[idx + 1] if idx + 1 < len(slist) else ""
+    return (before if ok(before) else ""), (after if ok(after) else "")
+
 
 
 def main():
@@ -172,21 +185,36 @@ def main():
                     pat = compiled.get(it["id"])
                     if pat is None or len(found[it["id"]]) >= MAX_PER_ITEM:
                         continue
-                    hits = [s for s in sentences(blob, pat)
+                    slist = split_sentences(blob)
+                    all_hits = match_sentences(slist, pat)
+                    hits = [(i, s) for i, s in all_hits
                             if s not in blocked and f"{level}:{s}" not in seen[it["id"]]]
-                    if not hits and len(blob) <= 10:
+                    if not all_hits and len(blob) <= 10:
                         for o in opts:
-                            hits = sentences(o, pat)
-                            if hits:
+                            slist2 = split_sentences(o)
+                            oh = match_sentences(slist2, pat)
+                            if oh:
+                                slist, all_hits, hits = slist2, oh, oh
                                 break
+                    if not all_hits and blob:
+                        m = pat.search(blob)
+                        if m:
+                            a = max(0, m.start() - 60)
+                            frag = blob[a:m.end() + 60].replace("\n", " ").strip()
+                            if (len(frag) >= 10 and not BAD_FRAG.search(frag)
+                                    and frag not in blocked
+                                    and f"{level}:{frag}" not in seen[it["id"]]):
+                                all_hits = hits = [(-1, frag)]
                     if not hits:
                         continue
-                    s = hits[0]
+                    idx, s = hits[0]
                     seen[it["id"]].add(f"{level}:{s}")
+                    cb, ca = ctx_of(slist, idx, blocked) if idx >= 0 else ("", "")
                     m2 = pat.search(s)
                     found[it["id"]].append({
                         "id": d.get("id", ""), "level": level,
                         "source": d.get("source", ""), "jp": s,
+                        "ctx_before": cb, "ctx_after": ca,
                         "match": m2.group(0) if m2 else "",
                         "answer_text": ans_text or d.get("answer_text", ""),
                     })
