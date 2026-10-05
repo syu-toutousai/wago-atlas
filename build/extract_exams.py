@@ -52,6 +52,7 @@ STRICT = {
     "mata": r"また(?![はもま])",
     "sate": r"さて(?=[、。])",
     "tokini": r"ときに(?=[、。])",
+    "tsuneni": r"(?<![非日通異平])常に",
 }
 OVERRIDES = {
     "te-miru": r"[てで]み(?:る|た|て|ます|よう|ろ)",
@@ -138,12 +139,46 @@ def ctx_of(slist, idx, blocked):
 
 
 
+def plain_forms(word):
+    """Display word -> lexical plain forms (drop 〜, parentheses, alternatives)."""
+    out = []
+    for part in re.split(r"[・／/、]", (word or "").replace("〜", "")):
+        base = re.sub(r"（[^）]*）", "", part).strip()
+        if base:
+            out.append(base)
+    return out
+
+
+def inside_longer(sentence, m, pos, own, longer_words):
+    """True when the matched surface sits inside a longer item word (非[常に])."""
+    for w in longer_words:
+        if w in own or len(w) <= len(m) or m not in w:
+            continue
+        start = sentence.find(w)
+        while start != -1:
+            if start <= pos and pos + len(m) <= start + len(w):
+                return True
+            start = sentence.find(w, start + 1)
+    return False
+
+
 def main():
     data_dir = ROOT / "data"
     exam_dir = data_dir / "exams"
     exam_dir.mkdir(parents=True, exist_ok=True)
     block_path = data_dir / "exam_blocklist.json"
     blocklist = json.loads(block_path.read_text(encoding="utf-8")) if block_path.exists() else {}
+    all_words, own_forms = set(), {}
+    for df0 in sorted(data_dir.glob("*.json")):
+        if df0.name in ("dimensions.json", "exam_blocklist.json"):
+            continue
+        d0 = json.loads(df0.read_text(encoding="utf-8"))
+        for it0 in d0.get("items") or []:
+            forms = plain_forms(it0.get("word", ""))
+            own_forms[it0["id"]] = set(forms)
+            for w0 in forms:
+                if len(w0) >= 2:
+                    all_words.add(w0)
     for df in sorted(data_dir.glob("*.json")):
         if df.name in ("dimensions.json", "exam_blocklist.json"):
             continue
@@ -185,25 +220,35 @@ def main():
                     pat = compiled.get(it["id"])
                     if pat is None or len(found[it["id"]]) >= MAX_PER_ITEM:
                         continue
+                    own = own_forms.get(it["id"], set())
+
+                    def usable(i, s):
+                        if s in blocked or f"{level}:{s}" in seen[it["id"]]:
+                            return False
+                        mm = pat.search(s)
+                        return not (mm and inside_longer(s, mm.group(0), mm.start(), own, all_words))
+
                     slist = split_sentences(blob)
                     all_hits = match_sentences(slist, pat)
-                    hits = [(i, s) for i, s in all_hits
-                            if s not in blocked and f"{level}:{s}" not in seen[it["id"]]]
+                    hits = [(i, s) for i, s in all_hits if usable(i, s)]
                     if not all_hits and len(blob) <= 10:
                         for o in opts:
                             slist2 = split_sentences(o)
                             oh = match_sentences(slist2, pat)
                             if oh:
-                                slist, all_hits, hits = slist2, oh, oh
+                                slist, all_hits = slist2, oh
+                                hits = [(i, s) for i, s in oh if usable(i, s)]
                                 break
                     if not all_hits and blob:
                         m = pat.search(blob)
                         if m:
                             a = max(0, m.start() - 60)
                             frag = blob[a:m.end() + 60].replace("\n", " ").strip()
-                            if (len(frag) >= 10 and not BAD_FRAG.search(frag)
+                            mm = pat.search(frag)
+                            if (mm and len(frag) >= 10 and not BAD_FRAG.search(frag)
                                     and frag not in blocked
-                                    and f"{level}:{frag}" not in seen[it["id"]]):
+                                    and f"{level}:{frag}" not in seen[it["id"]]
+                                    and not inside_longer(frag, mm.group(0), mm.start(), own, all_words)):
                                 all_hits = hits = [(-1, frag)]
                     if not hits:
                         continue
