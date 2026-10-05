@@ -15,6 +15,7 @@
 
 `id/word/read/subtype/level/origin/engine/blueprint/meaning/pattern/examples[]/note`
 ——`engine`＝実語→機能語の変化、`blueprint`＝一句话机制，二者必填。
+補助動詞は加えて `grammaticalization`（lexical＝実語寄り／mid＝中間／grammaticalized＝文法化済み）。
 
 ## 2.5 術語（学校文法・橋本進吉体系）
 

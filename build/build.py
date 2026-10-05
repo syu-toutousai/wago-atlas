@@ -414,7 +414,12 @@ table.obs .resp{font-weight:700;color:var(--acc)}
 .obar-row{display:flex;align-items:center;gap:10px;margin:7px 0;font-size:13px}
 .obar{flex:1;max-width:420px;height:12px;border-radius:99px;overflow:hidden;background:#eef1f6;display:flex}
 .obar i{display:block;height:100%}
-.obar .ow{background:#188a52}.obar .ok{background:#9c36b5}.obar .om{background:#b8860b}
+.obar .ow{background:#188a52}
+.ladder{border-left:4px solid;border-radius:10px;background:#fafbfe;padding:9px 12px;margin:8px 0}
+.ladder-h{display:flex;justify-content:space-between;gap:8px;align-items:baseline;flex-wrap:wrap}
+.ladder-list{display:flex;flex-wrap:wrap;gap:6px 10px;margin-top:6px;font-size:14px}
+.ladder-list a{font-weight:700}
+.ladder-list .hint{font-size:10.5px;margin-left:2px}.obar .ok{background:#9c36b5}.obar .om{background:#b8860b}
 .mini{background:#fff;border-radius:14px;padding:12px 10px;cursor:pointer;text-align:left;border:2px solid transparent;
 box-shadow:0 1px 6px rgba(30,40,90,.08);transition:.15s}
 .mini:hover{transform:translateY(-2px);border-color:var(--acc)}
@@ -424,6 +429,9 @@ box-shadow:0 1px 6px rgba(30,40,90,.08);transition:.15s}
 .chip.sub{background:#e6fffa;color:#0f766e}
 .chip.lv{background:#f1f3f8;color:#5b6478}
 .org-wago{background:var(--okbg);color:var(--ok)}
+.gram-lexical{background:#e9f7ef;color:#188a52}
+.gram-mid{background:#fff8e1;color:#b8860b}
+.gram-grammaticalized{background:#f3e8ff;color:#7c3aed}
 .org-kango{background:#f8f0fc;color:#9c36b5}
 .org-mixed{background:#fff8e1;color:#b8860b}
 .noun{scroll-margin-top:70px;border-left:5px solid var(--acc)}
@@ -487,6 +495,9 @@ const ITEMS=__ITEMS__;
 const EXAMS=__EXAMS__;
 const BANKS=__BANKS__;
 const ORIGIN_COUNT=__ORIGIN_COUNT__;
+const GRAM={lexical:["実語寄り","#188a52"],mid:["中間","#b8860b"],grammaticalized:["文法化済み","#7c3aed"]};
+const gramOf=n=>n.grammaticalization||"";
+const gramChip=n=>n.grammaticalization?`<span class="chip gram-${n.grammaticalization}" title="実語との距離">${GRAM[n.grammaticalization][0]}</span>`:"";
 const DIMENSIONS=__DIMENSIONS__;
 const OBSERVE=__OBSERVE__;
 let QS=__QS__;
@@ -554,7 +565,7 @@ function renderList(){
     <div class="mini-wrap">${members.map(n=>`
       <button class="mini" onclick="goDetail('${n.id}')">
         <div class="nm">${n.word}</div>
-        <div class="im"><span class="chip sub">${n.subtype}</span><span class="chip lv">${n.level}</span></div>
+        <div class="im"><span class="chip sub">${n.subtype}</span><span class="chip lv">${n.level}</span>${gramChip(n)}</div>
         <div class="im" style="margin-top:4px">${shortMean(n.meaning)}</div>
       </button>`).join("")}</div></div>`;
   });
@@ -575,7 +586,7 @@ function renderDetail(){
     h+=`<div class="card noun" id="n-${iid}">
       <h2>${n.word}<span class="jl">${n.level}</span></h2>
       <div class="meta"><span class="chip sub">${n.subtype}</span>
-        <span class="chip org-${org}" title="語種">${orgName}</span>
+        <span class="chip org-${org}" title="語種">${orgName}</span>${gramChip(n)}
         <code>${n.read}</code>
         ${AUDIO[iid]?`<button class="btn mini-btn" onclick="play('${iid}',this)">▶</button>`:""}
       </div>
@@ -638,6 +649,21 @@ function renderObserve(){
   h+=`<tr class="totrow"><td><b>合計</b></td>${lv.map(x=>
     `<td><b>${o.levelTotals[x].items}</b><span class="ex">/${o.levelTotals[x].exams}</span></td>`).join("")}<td></td></tr>
     </table></div></div>`;
+  if(o.grammaticalization){
+    h+=`<div class="card"><h3 class="sec">🧬 補助動詞の文法化ラダー（実語との距離）</h3>
+      <p class="hint">左＝語彙義がほぼそのまま（授受・局面動詞）；中＝比喩的拡張の中間；右＝アスペクト・状態の純マーカー。文法化は二分割ではなく連続体——ここでは三帯に整理。</p>`;
+    const lanes=[["lexical","実語寄り","語彙義がそのまま（授受・局面動詞）","#188a52"],
+                 ["mid","中間","方向・比喩的拡張（来る・行く・切る…）","#b8860b"],
+                 ["grammaticalized","文法化済み","アスペクト・状態のマーカー（ている・ておく・てしまう・てある）","#7c3aed"]];
+    lanes.forEach(([k,label,note,color])=>{
+      const list=o.grammaticalization[k]||[];
+      h+=`<div class="ladder" style="border-color:${color}">
+        <div class="ladder-h" style="color:${color}"><b>${label}</b>
+          <span class="hint">${note}（${list.length}）</span></div>
+        <div class="ladder-list">${list.map(x=>`<a class="jump" href="javascript:goDetail('${x.id}')">${x.word}</a><span class="hint">${x.level}</span>`).join("")}</div></div>`;
+    });
+    h+=`</div>`;
+  }
   h+=`<div class="card"><h3 class="sec">🧲 呼応マトリクス（陳述副詞 × 文末形式，${o.response.length} 条）</h3>
     <div class="tblwrap"><table class="obs"><tr><th>副詞</th><th>級</th><th>呼応先</th><th>意味</th></tr>`;
   o.response.forEach(r=>{

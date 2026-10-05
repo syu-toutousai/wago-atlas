@@ -38,6 +38,12 @@ def compute(dimensions, items, exams):
             "byLevel": by_level, "origins": origins,
         })
 
+    gram = {"lexical": [], "mid": [], "grammaticalized": []}
+    for it in items:
+        g = it.get("grammaticalization")
+        if g in gram:
+            gram[g].append({"word": it["word"], "id": it["id"], "level": it["level"],
+                            "engine": it.get("engine", "")})
     response = sorted(
         [{"word": it["word"], "read": it.get("read", ""), "level": it["level"],
           "subtype": it.get("subtype", ""), "response": it["response"],
@@ -55,6 +61,7 @@ def compute(dimensions, items, exams):
         "dims": rows,
         "future": [{"id": d["id"], "order": d.get("order", ""), "name": d["name"], "note": d.get("note", "")} for d in future],
         "response": response,
+        "grammaticalization": gram,
         "gaps": gaps,
         "levelTotals": level_totals,
         "totals": {
