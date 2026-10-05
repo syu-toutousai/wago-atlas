@@ -476,8 +476,8 @@ a.jump:hover{text-decoration:underline}
 </head>
 <body>
 <header><div class="wrap">
-<h1>和語アトラス（M1+M2+M3）</h1>
-<div class="kana">補助動詞・接続表現・副詞 —— 動詞の後ろ、文と文の間、そして用言の手前に潜む和語の文法。JLPT 真题命中付き 🌊</div>
+<h1>和語アトラス（M1〜D5）</h1>
+<div class="kana">補助動詞・接続表現・副詞・形式名詞・オノマトペ —— 動詞の後ろ、文と文の間、用言の手前、名詞の代わり、そして音そのものに潜む和語の文法。JLPT 真题命中付き 🌊</div>
 <div class="tags">__TAGS__</div>
 </div></header>
 
@@ -548,9 +548,10 @@ function dimList(){
     .sort((a,b)=>String(a.order).localeCompare(String(b.order)));
 }
 function renderList(){
-  let h=`<div class="card intro"><h2>和語の文法エンジンを二層で 🌊</h2>
-  <p>M1＝<b>補助動詞</b>（動詞の後ろ）・M2＝<b>接続表現</b>（文と文の間）・M3＝<b>副詞・連用修飾</b>（用言の手前）。
-  三層とも<b>和語（または和語由来の機能語）</b>が文の調整つまみになる——文法化の最前線である。</p>
+  let h=`<div class="card intro"><h2>和語の文法エンジンを多層で 🌊</h2>
+  <p>M1＝<b>補助動詞</b>（動詞の後ろ）・M2＝<b>接続表現</b>（文と文の間）・M3＝<b>副詞・連用修飾</b>（用言の手前）・
+  D4＝<b>形式名詞</b>（名詞の代わり）・D5＝<b>オノマトペ</b>（音そのもの）。
+  どの層も<b>和語（または和語由来の機能語）</b>が文の調整つまみになる——文法化の最前線である。</p>
   <div class="steps">
     <div><b>① 和語が主役</b><br>見る・置く・仕舞う・呉れる…が「〜てみる／〜ておく／〜てしまう／〜てくれる」に。</div>
     <div><b>② 文法化の度合い</b><br>実語性が消えるほど機能語化。Engine 欄で「何がどう薄れたか」を確認。</div>

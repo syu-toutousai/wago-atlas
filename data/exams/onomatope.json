@@ -1,0 +1,319 @@
+{
+ "wakuwaku": [
+  {
+   "id": "2019-07-reading-long-67",
+   "level": "n1",
+   "source": "JLPT N1 2019年7月 読解 問題12(67)",
+   "jp": "ヒマで死にそうな人にも、あの、 わくわくする自由は訪れない。",
+   "match": "わくわく",
+   "answer_text": ""
+  },
+  {
+   "id": "2019-12-reading-mid-52",
+   "level": "n1",
+   "source": "JLPT N1 2019年12月 読解 問題9(52)",
+   "jp": "たとえば私の評論を書くときの経験では、論旨のエッセンスとなるような直感とか、ハイライト部分 (注1)の「決め」になるようなフレーズ (注2)を思いついたときに「これは書ける」なんてわくわくして思い立つのである。",
+   "match": "わくわく",
+   "answer_text": ""
+  }
+ ],
+ "dokidoki": [
+  {
+   "id": "2014-07-grammar-passage-41",
+   "level": "n1",
+   "source": "JLPT N1 2014年7月 言語知識(文法) 問題7(41)",
+   "jp": "あのいいまわし、あの呼吸、あのどきどき感、あのばかばかしさ。",
+   "match": "どきどき",
+   "answer_text": ""
+  },
+  {
+   "id": "2024-07-grammar-passage-41",
+   "level": "n1",
+   "source": "JLPT N1 2024年7月 言語知識(文法) 問題7(41)",
+   "jp": "胸がどきどきして、たいへん緊張したでしょう。",
+   "match": "どきどき",
+   "answer_text": ""
+  },
+  {
+   "id": "2017-07-n3-s00-unknown-34",
+   "level": "n3",
+   "source": "JLPT N3 2017年7月",
+   "jp": "先週、大勢の人の前でスピーチをしたとき、緊張で胸がどきどきした。",
+   "match": "どきどき",
+   "answer_text": "先週、大勢の人の前でスピーチをしたとき、緊張で胸がどきどきした。"
+  }
+ ],
+ "iraira": [],
+ "harahara": [],
+ "ukiuki": [],
+ "gakkari": [
+  {
+   "id": "2024-12-grammar-passage-41",
+   "level": "n1",
+   "source": "JLPT N1 2024年12月 言語知識(文法) 問題7(41)",
+   "jp": "十代からは徐々にそれが間遠になり、 この数年はとんと失敗をしていない。 最初から自分の迂闊さを(43)、何を落とそうともがっかりはしない。 もはやそんなことはあるまいと高を括っていた(注2)だけに、傲慢な自分がなおさら情けなくなる。 顧みれば逆上が",
+   "match": "がっかり",
+   "answer_text": ""
+  },
+  {
+   "id": "2017-12-vocab-usage-25",
+   "level": "n1",
+   "source": "JLPT N1 2017年12月 言語知識(文字・語彙) 問題4(25)",
+   "jp": "姉は知らせを聞いてがっかりしたのか、うなだれて顔を上げなかった。",
+   "match": "がっかり",
+   "answer_text": ""
+  },
+  {
+   "id": "2024-07-n3-s05-grammar-passage-08",
+   "level": "n3",
+   "source": "JLPT N3 2024年7月 問題5(8)",
+   "jp": "②がっかりして、友達に電話をして聞いてみると、ホウレンソウは夜になったら、光が当たってはいけないということがわかりました。",
+   "match": "がっかり",
+   "answer_text": "夜、ホウレンソウに光が当たらないようにしたから。"
+  },
+  {
+   "id": "2024-07-n3-s05-grammar-passage-07",
+   "level": "n3",
+   "source": "JLPT N3 2024年7月 問題5(7)",
+   "jp": "28) ②がっかりしてとあるが、 とうしてがっかりしたのか。",
+   "match": "がっかり",
+   "answer_text": "ホウレンソウが全部枯れてしまったから。"
+  }
+ ],
+ "gussuri": [
+  {
+   "id": "2018-12-n3-s00-unknown-57",
+   "level": "n3",
+   "source": "JLPT N3 2018年12月",
+   "jp": "でも、実際に寝てみるととても気持ちがよく、ぐっすり眠りました。",
+   "match": "ぐっすり",
+   "answer_text": "でしか"
+  },
+  {
+   "id": "2024-12-n3-s05-問題5-04",
+   "level": "n3",
+   "source": "JLPT N3 2024年12月 問題5(4)",
+   "jp": "遠慮しないで、ぐっすり食べてください。",
+   "match": "ぐっすり",
+   "answer_text": ""
+  }
+ ],
+ "utouto": [],
+ "suyasuya": [],
+ "kutakuta": [
+  {
+   "id": "2011-12-n2-s05-vocab-paraphrase-01",
+   "level": "n2",
+   "source": "JLPT N2 2011年12月 問題5(1)",
+   "jp": "真夏の屋外でずっと仕事をしたら、くたくたになった。",
+   "match": "くたくた",
+   "answer_text": "ひどく疲れた"
+  }
+ ],
+ "hetoheto": [],
+ "guttari": [],
+ "furafura": [
+  {
+   "id": "2020-12-n3-s00-unknown-34",
+   "level": "n3",
+   "source": "JLPT N3 2020年12月",
+   "jp": "暑い日が続いたので、畑の野菜がふらふらだ。",
+   "match": "ふらふら",
+   "answer_text": "熱があるから、立って歩くと少し体がふらふらする。"
+  }
+ ],
+ "yoroyoro": [],
+ "zukizuki": [],
+ "gangan": [],
+ "kirakira": [],
+ "pikapika": [],
+ "tsuyatsuya": [],
+ "sarasara": [],
+ "tsurutsuru": [],
+ "zarazara": [],
+ "betabeta": [],
+ "nebaneba": [],
+ "dorodoro": [],
+ "parapara": [
+  {
+   "id": "2012-12-reading-long-63",
+   "level": "n1",
+   "source": "JLPT N1 2012年12月 読解 問題11(63)",
+   "jp": "ぺージをぱらぱらとめくりながら、気になったことばの解説を読むという楽しみ方です。",
+   "match": "ぱらぱら",
+   "answer_text": ""
+  }
+ ],
+ "potsupotsu": [],
+ "zaazaa": [],
+ "shitoshito": [],
+ "gayagaya": [],
+ "waiwai": [],
+ "perapera": [
+  {
+   "id": "2018-12-n3-s00-unknown-29",
+   "level": "n3",
+   "source": "JLPT N3 2018年12月",
+   "jp": "リーさんは日本語が (ぺらぺら) です。",
+   "match": "ぺらぺら",
+   "answer_text": "上手に話せます"
+  }
+ ],
+ "butsubutsu": [],
+ "guruguru": [],
+ "gorogoro": [],
+ "urouro": [
+  {
+   "id": "2011-12-reading-long-67",
+   "level": "n1",
+   "source": "JLPT N1 2011年12月 読解 問題12(67)",
+   "jp": "自分たちの生活の基盤になる条件さえそろっていれば、たとえその条件が人工のものであろうとも、そしてそこをたくさんの人間がうろうろしていようとも、平気で棲みついてしまう。",
+   "match": "うろうろ",
+   "answer_text": ""
+  }
+ ],
+ "burabura": [
+  {
+   "id": "2023-07-reading-long-57",
+   "level": "n1",
+   "source": "JLPT N1 2023年7月 読解 問題10(57)",
+   "jp": "僕らがミーティングをしているとき、突然ロボピーは僕らの音声を認識し、「そうではないよ」と言って手をぶらぶらさせながらどこかへ向かって歩きだしたのだ。",
+   "match": "ぶらぶら",
+   "answer_text": ""
+  }
+ ],
+ "kosokoso": [],
+ "donyori": [
+  {
+   "id": "2010-12-vocab-paraphrase-15",
+   "level": "n1",
+   "source": "JLPT N1 2010年12月 言語知識(文字・語彙) 問題3(15)",
+   "jp": "昨日は一日中どんよりした天気だった。",
+   "match": "どんより",
+   "answer_text": ""
+  }
+ ],
+ "jimejime": [],
+ "mukamuka": [],
+ "kankan": [],
+ "nikoniko": [
+  {
+   "id": "2023-07-n3-s05-問題5-05",
+   "level": "n3",
+   "source": "JLPT N3 2023年7月 問題5(5)",
+   "jp": "ガソリンが少なくなって、車が途中で止まりそうでにこにこした。",
+   "match": "にこにこ",
+   "answer_text": "遊んでいる私たちを見て、祖母はうれしそうににこにこしていた。"
+  }
+ ],
+ "niyaniya": [],
+ "hakhaki": [
+  {
+   "id": "2024-07-n2-s06-vocab-usage-03",
+   "level": "n2",
+   "source": "JLPT N2 2024年7月 問題6(3)",
+   "jp": "よく眠ったので、今日は頭がはきはきとしている。",
+   "match": "はきはき",
+   "answer_text": "その学生は、聞かれたことにはきはきと答えた。"
+  }
+ ],
+ "zawazawa": [],
+ "gatagata": [],
+ "karakara": [],
+ "pachipachi": [],
+ "guuguu": [],
+ "gokugoku": [],
+ "mogumogu": [],
+ "punpun": [],
+ "barabara": [
+  {
+   "id": "2013-07-reading-short-49",
+   "level": "n1",
+   "source": "JLPT N1 2013年7月 読解 問題8(49)",
+   "jp": "今の世には明るいものは余りに少なく、暗いものは余りに多く見えるが、両者は別個のばらばらではない。",
+   "match": "ばらばら",
+   "answer_text": ""
+  },
+  {
+   "id": "2019-12-reading-mid-52",
+   "level": "n1",
+   "source": "JLPT N1 2019年12月 読解 問題9(52)",
+   "jp": "つまり、その瞬間の頭に浮かんだものは、ばらばらな断片と大まかな展望に他ならない。",
+   "match": "ばらばら",
+   "answer_text": ""
+  }
+ ],
+ "guchagucha": [],
+ "boroboro": [],
+ "hirahira": [],
+ "yurayura": [],
+ "guragura": [],
+ "noronoro": [],
+ "tobotobo": [],
+ "nurunuru": [],
+ "pokapoka": [],
+ "mushimushi": [],
+ "shittori": [],
+ "sukkiri": [
+  {
+   "id": "2016-07-listening-grammar-02",
+   "level": "n1",
+   "source": "JLPT N1 2016年7月 聴解 問題2(2)",
+   "jp": "気分がすっきりするから",
+   "match": "すっきり",
+   "answer_text": ""
+  }
+ ],
+ "fuwafuwa": [
+  {
+   "id": "2019-12-reading-mid-52",
+   "level": "n1",
+   "source": "JLPT N1 2019年12月 読解 問題9(52)",
+   "jp": "私たちの意識は、言葉とイメージの網の目をふわふわ漂っているようなものである。",
+   "match": "ふわふわ",
+   "answer_text": ""
+  }
+ ],
+ "mochimochi": [],
+ "gunyagunya": [],
+ "gatsugatsu": [],
+ "unzari": [
+  {
+   "id": "2013-12-reading-long-67",
+   "level": "n1",
+   "source": "JLPT N1 2013年12月 読解 問題12(67)",
+   "jp": "あげくの果てに(注)「話しても無駄だし、また同じことの繰り返しか」とうんざりし、コミュニケーションをあきらめてしまう――ほうっておくとこんな事態に陥ることも、珍しくはありません。",
+   "match": "うんざり",
+   "answer_text": ""
+  }
+ ],
+ "zotto": [],
+ "hatto": [
+  {
+   "id": "2022-12-reading-short-48",
+   "level": "n1",
+   "source": "JLPT N1 2022年12月 読解 問題8(48)",
+   "jp": "そうした質間を真正面から投げかけられたとき、はっと何か気づかされるところがあって、自分の日常を反省するような反応を示さないとしたら、その人の感性は相当に（注）枯れていると考えたほうがよい。",
+   "match": "はっと",
+   "answer_text": ""
+  }
+ ],
+ "odoodo": [],
+ "ujiuji": [],
+ "isoiso": [],
+ "kirikiri": [],
+ "chikuchiku": [],
+ "hirihiri": [],
+ "shonbori": [],
+ "gakkuri": [],
+ "pekopeko": [
+  {
+   "id": "2019-12-n3-s00-unknown-29",
+   "level": "n3",
+   "source": "JLPT N3 2019年12月",
+   "jp": "おなかが(ぺこぺこ)だ。",
+   "match": "ぺこぺこ",
+   "answer_text": "すいている"
+  }
+ ]
+}

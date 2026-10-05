@@ -120,7 +120,7 @@ def sentences(text, pat, max_len=160):
         if m:
             a = max(0, m.start() - 60)
             frag = text[a:m.end() + 60].replace("\n", " ").strip()
-            if not re.search(r"[（(]\s*[）)]|\[\d{1,2}\]|★", frag):
+            if len(frag) >= 10 and not re.search(r"[（(]\s*[）)]|\[\d{1,2}\]|★", frag):
                 out.append(frag)
     return out
 
