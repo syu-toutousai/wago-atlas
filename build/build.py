@@ -445,6 +445,7 @@ border-radius:8px;padding:2px 9px;font-size:12px}
 .meanbox{background:#ecfdf5;border-radius:12px;padding:10px 13px;font-size:14px;line-height:1.8;margin:10px 0}
 .note{font-size:13px;color:var(--gold);margin-top:10px;border-top:1px dashed var(--line);padding-top:9px;line-height:1.65}
 h3.sec{font-size:15px;color:var(--sub);margin:16px 0 8px;font-weight:600}
+h3.verbhead{color:var(--acc);border-left:4px solid var(--acc);padding-left:8px;margin:18px 0 4px}
 .q{font-size:16.5px;line-height:1.75;margin-bottom:14px}
 .opt{display:block;width:100%;text-align:left;padding:12px 14px;margin:8px 0;font-size:15.5px;
 border-radius:12px;border:2px solid var(--line);background:#fff;cursor:pointer;line-height:1.5}
@@ -581,7 +582,9 @@ function renderDetail(){
     const members=dimItems(dim.id);
     if(!members.length)return;
     h+=`<h2 class="dimhead" id="d-${dim.id}">${dim.order} ${dim.name} <span class="hint">${dim.note}</span></h2>`;
+    let lastVerb="";
     members.forEach(n=>{
+    if(n.verb && n.verb!==lastVerb){lastVerb=n.verb;h+=`<h3 class="sec verbhead">🔤 ${n.verb}</h3>`;}
     const iid=n.id;
     const org=n.origin||"wago";
     const orgName={wago:"和語",kango:"漢語",mixed:"混種"}[org];
