@@ -289,25 +289,26 @@ def build_questions(items, exams_by_id, audio):
 
     for it in items:
         iid = it["id"]
+        dim_name = it.get("dimName", "和語")
         add("recog", f"{iid}:recog",
             q=f"「{it['word']}」の意味は？",
-            opts=[it["meaning"]] + others(it, "meaning"),
+            opts=[it["meaning"]] + others_dim(it, "meaning"),
             ans=0,
             exp=f"{it['word']}＝{it['meaning']}<br>🔧 {it['engine']}<br>🧭 {it['blueprint']}")
         bl = blank_example(it)
         if "（　）" in bl:
-            opts = [it["word"]] + others(it, "word")
+            opts = [it["word"]] + others_dim(it, "word")
             rng.shuffle(opts)
             add("fill", f"{iid}:fill",
-                q=f"（　）に入る補助動詞は？<br><span class='jp'>{bl}</span>",
+                q=f"（　）に入る〈{dim_name}〉は？<br><span class='jp'>{bl}</span>",
                 opts=opts, ans=opts.index(it["word"]),
                 exp=f"原句：{it['examples'][0]['jp']}<br>{it['examples'][0].get('cn','')}<br>🔧 {it['engine']}")
         ex0 = it["examples"][0]
         if f"{iid}-e0" in audio:
-            opts = [it["word"]] + others(it, "word")
+            opts = [it["word"]] + others_dim(it, "word")
             rng.shuffle(opts)
             add("listen", f"{iid}:listen", type="listen", aid=f"{iid}-e0",
-                q="🎧 音声に含まれる補助動詞は？", opts=opts, ans=opts.index(it["word"]),
+                q=f"🎧 音声に含まれる〈{dim_name}〉は？", opts=opts, ans=opts.index(it["word"]),
                 exp=f"原句：{ex0['jp']}<br>{ex0.get('cn','')}")
             cn_pool = [ex0.get("cn", "")] + [x["examples"][0].get("cn", "")
                                              for x in items if x["id"] != iid and x.get("examples")]
