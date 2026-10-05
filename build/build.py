@@ -125,7 +125,7 @@ except ImportError:
 _KANJI = r"\u4e00-\u9fff\u3007\u303b\u3400-\u4dbf"
 _INLINE = re.compile(rf"([{_KANJI}]{{1,8}})\s*\(([ぁ-んァ-ンのー]{{1,10}})\)")
 _KANJI_RE = re.compile(rf"[{_KANJI}]")
-_READING_OVERRIDES = [("心当たり", "こころあたり"), ("お手上げ", "おてあげ")]
+_READING_OVERRIDES = [("心当たり", "こころあたり"), ("お手上げ", "おてあげ"), ("経つ", "たつ")]
 
 
 def _furi(text):
@@ -146,6 +146,7 @@ def _furi(text):
 def add_furigana(text):
     if not HAS_KAKASI or not _KANJI_RE.search(text):
         return text
+    text = re.sub(r"(\d+)時", r"\1時(じ)", text)
     matches = []
     for phrase, reading in _READING_OVERRIDES:
         for m in re.finditer(re.escape(phrase), text):
@@ -239,7 +240,7 @@ def _word_pattern(word):
 def blank_example(it):
     ex = (it.get("examples") or [{}])[0]
     jp = ex.get("jp", "")
-    pat = BLANKS.get(it["id"]) or _word_pattern(it["word"])
+    pat = BLANKS.get(it["id"]) or it.get("match") or _word_pattern(it["word"])
     if pat:
         out = re.sub(pat, "（　）", jp, count=1)
         if out != jp:
@@ -331,7 +332,7 @@ def build_questions(items, exams_by_id, audio):
         for n, e in enumerate(exams_by_id.get(iid, [])):
             jp = e["jp"]
             blanked = None
-            pat = BLANKS.get(iid) or _word_pattern(it["word"])
+            pat = BLANKS.get(iid) or it.get("match") or _word_pattern(it["word"])
             if pat:
                 m2 = re.search(pat, jp)
                 if m2:

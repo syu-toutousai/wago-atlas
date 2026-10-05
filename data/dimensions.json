@@ -1,9 +1,34 @@
 {
   "dimensions": [
-    {"id": "hojodoushi", "name": "補助動詞", "order": "D1", "note": "動詞の連用形＋て＋和語動詞の機能化（M1 収録）"},
-    {"id": "setsuzoku", "name": "接続表現", "order": "D2", "note": "接続詞・接続助詞——文と文の関節（M2 収録）"},
-    {"id": "fukushi", "name": "副詞・連用修飾", "order": "D3", "note": "情態/程度/頻度/陳述＋オノマトペ（M3）"},
-    {"id": "keishiki", "name": "形式名詞", "order": "D4", "note": "こと・もの・わけ…（接口 keishiku-courseware）"},
-    {"id": "wago-doushi", "name": "和語動詞の多義", "order": "D6", "note": "かける・とる・あげる…（M4）"}
+    {
+      "id": "hojodoushi",
+      "name": "補助動詞",
+      "order": "D1",
+      "note": "動詞の連用形＋て＋和語動詞の機能化（M1 収録）"
+    },
+    {
+      "id": "setsuzoku",
+      "name": "接続表現",
+      "order": "D2",
+      "note": "接続詞・接続助詞——文と文の関節（M2 収録）"
+    },
+    {
+      "id": "fukushi",
+      "name": "副詞・連用修飾",
+      "order": "D3",
+      "note": "情態/程度/頻度/陳述＋オノマトペ（M3）"
+    },
+    {
+      "id": "keishiki",
+      "name": "形式名詞",
+      "order": "D4",
+      "note": "こと・もの・わけ・はず…40型（D4 収録）"
+    },
+    {
+      "id": "wago-doushi",
+      "name": "和語動詞の多義",
+      "order": "D6",
+      "note": "かける・とる・あげる…（M4）"
+    }
   ]
 }
