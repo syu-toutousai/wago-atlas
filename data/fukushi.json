@@ -3630,6 +3630,114 @@
      "cn": "性格爽快。"
     }
    ]
+  },
+  {
+   "id": "yokuyoku",
+   "word": "よくよく",
+   "read": "よくよく",
+   "subtype": "情態副詞",
+   "level": "N2",
+   "origin": "wago",
+   "engine": "「よく」的叠音：不是“经常”，而是“反复细看、深思”",
+   "blueprint": "同一副词叠一次，把程度变成反复与仔细",
+   "meaning": "仔细地、反复地（思考/查看）",
+   "examples": [
+    {
+     "jp": "よくよく考えると、彼の言い分ももっともだ。",
+     "cn": "仔细想想，他的话也有道理。"
+    },
+    {
+     "jp": "よくよく見れば、この生地は織り目が細かい。",
+     "cn": "仔细看的话，这块布料织纹很细。"
+    },
+    {
+     "jp": "よくよく確認してから申し込んでください。",
+     "cn": "请仔细确认后再申请。"
+    },
+    {
+     "jp": "よくよく調べてみると、記録に誤りがあった。",
+     "cn": "仔细一查，记录里有错误。"
+    }
+   ],
+   "note": "「よく」叠音后意思偏向“反复、仔细”，不表频率；常与「考える・見る・確認する」搭配。",
+   "nadeshiko": [
+    {
+     "jp": "よくよく考(かんが)えると ヤバいよなぁ",
+     "en": "Yeah, it's pretty risky, actually.",
+     "cn": "仔细想想，这可不太妙啊。",
+     "media": "Higehiro: After Being Rejected, I Shaved and Took in a High School Runaway",
+     "ep": "EP1",
+     "at": "14:41",
+     "url": "https://nadeshiko.co/en/sentence/2bNJguL9-qTC",
+     "audio": "https://cdn.nadeshiko.co/media/114232/1/8f75fc2940.mp3",
+     "thumb": "https://cdn.nadeshiko.co/media/114232/1/8f75fc2940.webp"
+    },
+    {
+     "jp": "よくよく見(み)れば 素質(そしつ)がある",
+     "en": "On closer inspection, he has what it takes.",
+     "cn": "仔细一看，他素质不错。",
+     "media": "Assassination Classroom",
+     "ep": "EP17",
+     "at": "13:18",
+     "url": "https://nadeshiko.co/en/sentence/gZdB20EJ8M4F",
+     "audio": "https://cdn.nadeshiko.co/media/20755/17/e4549844f5.mp3",
+     "thumb": "https://cdn.nadeshiko.co/media/20755/17/e4549844f5.webp"
+    }
+   ]
+  },
+  {
+   "id": "jitsuni",
+   "word": "実に",
+   "read": "じつに",
+   "subtype": "程度副詞",
+   "level": "N3",
+   "origin": "kango",
+   "engine": "漢語「実」＋に：把评价坐实——“实打实地…”",
+   "blueprint": "用「实」给评价加固，带感叹语气",
+   "meaning": "实在、确实、非常（带感叹的强调）",
+   "examples": [
+    {
+     "jp": "実に面白い本だった。",
+     "cn": "实在是一本有趣的书。"
+    },
+    {
+     "jp": "彼の演奏は実に見事だった。",
+     "cn": "他的演奏实在精彩。"
+    },
+    {
+     "jp": "実に残念な結果になった。",
+     "cn": "结果实在遗憾。"
+    },
+    {
+     "jp": "この町は実に居心地がいい。",
+     "cn": "这座城市住着实在舒服。"
+    }
+   ],
+   "note": "书面/演讲体，带感叹；日常口语多用「本当に・すごく」。",
+   "nadeshiko": [
+    {
+     "jp": "実(じつ)にいい! 実(じつ)に すばらしい体(からだ)デス!",
+     "en": "Fantastic! What a fantastic body this is!",
+     "cn": "真棒！这副身体实在了得！",
+     "media": "Re:ZERO -Starting Life in Another World-",
+     "ep": "EP12",
+     "at": "44:50",
+     "url": "https://nadeshiko.co/en/sentence/VEyZu6JNnz0R",
+     "audio": "https://cdn.nadeshiko.co/media/21355/12/523d8a819c.mp3",
+     "thumb": "https://cdn.nadeshiko.co/media/21355/12/523d8a819c.webp"
+    },
+    {
+     "jp": "実(じつ)に 実(じつ)に 実(じつ)にー!",
+     "en": "Truly, truly, truly!",
+     "cn": "实在、实在、实在太……！",
+     "media": "Re:ZERO -Starting Life in Another World-",
+     "ep": "EP8",
+     "at": "36:14",
+     "url": "https://nadeshiko.co/en/sentence/S_8J6gHwL6iN",
+     "audio": "https://cdn.nadeshiko.co/media/21355/8/17e4b4e633.mp3",
+     "thumb": "https://cdn.nadeshiko.co/media/21355/8/17e4b4e633.webp"
+    }
+   ]
   }
  ]
 }

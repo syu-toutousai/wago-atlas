@@ -23,6 +23,7 @@ MAX_PER_ITEM = 8
 # hand-tuned patterns for M1（word からの導出より精密）
 # STRICT: 短い機能語の誤命中（複合語・別語内部）を防ぐ境界付きパターン
 STRICT = {
+    "mada": r"まだ(?!まだ)",
     "kedo": r"(?:だ)?けど(?=[、。！？\s「」』]|$|ね|な|よ|も)",
     "noni": r"のに(?=[、。！？\s「」]|$|ね|な|よ|は|も|、)",
     "node": r"(?<![そこあど])ので",
@@ -38,7 +39,7 @@ STRICT = {
     "nitsuke": r"(?:(?<=[るい])|(?<=何か))につけ(?![てこ])",
     "gahayaika": r"が早いか(?![ら])",
     "sonouchi": r"そのうち(?!の)",
-    "yoku": r"よく(?!ない)",
+    "yoku": r"(?<!く)よく(?!ない|よく)",
     "tsuini": r"ついに(?!て)",
     "samo": r"(?:^|(?<=[。！？、]))さも(?!し)",
     "douka": r"(?:^|(?<=[。！？]))どうか(?=[、。お願])",
@@ -48,7 +49,7 @@ STRICT = {
     "futo": r"(?<![一-龯])ふと(?![ん一-龯])",
     "mou": r"(?<!いも)もう(?!と)",
     "moshi": r"もし(?!かして)",
-    "mata": r"また(?![はも])",
+    "mata": r"また(?![はもま])",
     "sate": r"さて(?=[、。])",
     "tokini": r"ときに(?=[、。])",
 }
@@ -182,9 +183,11 @@ def main():
                         continue
                     s = hits[0]
                     seen[it["id"]].add(f"{level}:{s}")
+                    m2 = pat.search(s)
                     found[it["id"]].append({
                         "id": d.get("id", ""), "level": level,
                         "source": d.get("source", ""), "jp": s,
+                        "match": m2.group(0) if m2 else "",
                         "answer_text": ans_text or d.get("answer_text", ""),
                     })
         out = exam_dir / df.name

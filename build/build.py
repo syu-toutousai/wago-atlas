@@ -329,14 +329,25 @@ def build_questions(items, exams_by_id, audio):
                     ans=jp_pool.index(ex0["jp"]),
                     exp=f"原句：{ex0['jp']}<br>{ex0['cn']}")
         for n, e in enumerate(exams_by_id.get(iid, [])):
+            jp = e["jp"]
+            blanked = None
+            pat = BLANKS.get(iid) or _word_pattern(it["word"])
+            if pat:
+                m2 = re.search(pat, jp)
+                if m2:
+                    blanked = jp[:m2.start()] + "（　）" + jp[m2.end():]
+            if not blanked and e.get("match") and e["match"] in jp:
+                blanked = jp.replace(e["match"], "（　）", 1)
+            if not blanked:
+                continue  # 无法安全挖空则不出题（语料仍在真題 Tab 展示）
             opts = [it["word"]] + others_dim(it, "word")
             rng.shuffle(opts)
             add("exam", f"{iid}:exam-{n}",
-                q=(f"📝 次の JLPT 実出題文に含まれる〈{it.get('dimName', '和語')}〉は？<br>"
-                   f"<span class='jp'>{e['jp']}</span>"
+                q=(f"📝 次の JLPT 実出題文の（　）に入る〈{it.get('dimName', '和語')}〉は？<br>"
+                   f"<span class='jp'>{blanked}</span>"
                    f"<div class='hint'>{e['source']}</div>"),
                 opts=opts, ans=opts.index(it["word"]),
-                exp=f"正解：{it['word']}＝{it['meaning']}<br>出典：{e['source']}")
+                exp=f"正解：{it['word']}＝{it['meaning']}<br>原句：{jp}<br>出典：{e['source']}")
     return qs
 
 
@@ -593,7 +604,7 @@ function renderExams(){
   let h=`<div class="card intro"><h2>📝 JLPT 真題コーパス（和語アトラス）</h2>
   <p>ローカルの N1-N5 真題库から、各条目的実出題文を抽出（出典付き）。計 ${flat.length} 句・${nTypes} 条目。
   これらは<strong>実際の過去問の文</strong>で、本ページは「原文観察」用のコーパス。
-  クイズの〈真題句クイズ〉は、この実出題文に該当項目が含まれるかを問う<strong>自動生成問題</strong>（JLPT 原題そのものではない）。</p>
+  クイズの〈真題句クイズ〉は、実出題文の該当箇所を空欄にした<strong>自動生成の穴埋め問題</strong>（JLPT 原題そのものではない）。</p>
   <p class="hint">JLPT 官方不公开真题；出处为公开整理站点收录，按用户判定注明出处的引用不涉版权问题。</p></div>`;
   dimList().forEach(dim=>{
     const members=dimItems(dim.id).filter(n=>(EXAMS[n.id]||[]).length);
