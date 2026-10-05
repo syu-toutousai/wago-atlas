@@ -120,8 +120,8 @@ def match_sentences(slist, pat, max_len=160):
     for idx, s in enumerate(slist):
         if not s or not pat.search(s) or len(s) > max_len or len(s) < 6:
             continue
-        # 空欄・並べ替えマーカーを含む断片はコーパス向けに除外
-        if BAD_FRAG.search(s):
+        # 空欄・並べ替えマーカーを含む断片と、文として完結しない断片は除外
+        if BAD_FRAG.search(s) or not s.endswith(("。", "！", "？")):
             continue
         out.append((idx, s))
     return out
@@ -131,6 +131,7 @@ def ctx_of(slist, idx, blocked):
     """Previous/next sentence as readable context (empty when unusable)."""
     def ok(s):
         return (s and 6 <= len(s) <= 130 and s not in blocked
+                and s.endswith(("。", "！", "？"))
                 and not CTX_BAD.search(s) and not BAD_FRAG.search(s)
                 and not re.fullmatch(r"[\d\s・,，。、]+", s))
     before = slist[idx - 1] if idx - 1 >= 0 else ""
@@ -228,28 +229,11 @@ def main():
                         mm = pat.search(s)
                         return not (mm and inside_longer(s, mm.group(0), mm.start(), own, all_words))
 
+                    # 语料只取题目正文中的完整句：选项（尤其用法题的错误选项）、
+                    # 片段回退一律禁止，防止「伪真题」混入。
                     slist = split_sentences(blob)
                     all_hits = match_sentences(slist, pat)
                     hits = [(i, s) for i, s in all_hits if usable(i, s)]
-                    if not all_hits and len(blob) <= 10:
-                        for o in opts:
-                            slist2 = split_sentences(o)
-                            oh = match_sentences(slist2, pat)
-                            if oh:
-                                slist, all_hits = slist2, oh
-                                hits = [(i, s) for i, s in oh if usable(i, s)]
-                                break
-                    if not all_hits and blob:
-                        m = pat.search(blob)
-                        if m:
-                            a = max(0, m.start() - 60)
-                            frag = blob[a:m.end() + 60].replace("\n", " ").strip()
-                            mm = pat.search(frag)
-                            if (mm and len(frag) >= 10 and not BAD_FRAG.search(frag)
-                                    and frag not in blocked
-                                    and f"{level}:{frag}" not in seen[it["id"]]
-                                    and not inside_longer(frag, mm.group(0), mm.start(), own, all_words)):
-                                all_hits = hits = [(-1, frag)]
                     if not hits:
                         continue
                     idx, s = hits[0]

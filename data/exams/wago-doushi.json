@@ -1,16 +1,6 @@
 {
  "kakeru-denwa": [
   {
-   "id": "2015-07-listening-point-04",
-   "level": "n1",
-   "source": "JLPT N1 2015年7月 聴解 問題1(4)",
-   "jp": "取引先に電話をかける",
-   "ctx_before": "",
-   "ctx_after": "",
-   "match": "電話をかけ",
-   "answer_text": ""
-  },
-  {
    "id": "2010-12-n2-s05-vocab-paraphrase-02",
    "level": "n2",
    "source": "JLPT N2 2010年12月 問題5(2)",
@@ -30,16 +20,6 @@
    "jp": "その反対に、ゆっくり読むことを心がけていれば、時間をかけるにふさわしい、手(て)応(ごた)えのある本を好むようになるだろう。",
    "ctx_before": "速く読もうと思えば、速く読めるような内容の薄い本へと自然と手が伸びがちである。",
    "ctx_after": "(平野啓一郎『本の読み方スロー・リーディングの実践』による)\n\n筆者によると、読書を楽しむにはどうすればよいか。",
-   "match": "時間をかけ",
-   "answer_text": ""
-  },
-  {
-   "id": "2019-07-listening-grammar-04",
-   "level": "n1",
-   "source": "JLPT N1 2019年7月 聴解 問題2(4)",
-   "jp": "時間をかけて構成を考えるべきだった",
-   "ctx_before": "",
-   "ctx_after": "",
    "match": "時間をかけ",
    "answer_text": ""
   },
@@ -84,54 +64,13 @@
    "answer_text": "しぼった"
   }
  ],
- "kakeru-meiwaku": [
-  {
-   "id": "2022-12-vocab-usage-24",
-   "level": "n1",
-   "source": "JLPT N1 2022年12月 言語知識(文字・語彙) 問題4(24)",
-   "jp": "仕事で手痛いミスをして、周りに迷惑をかけた。",
-   "ctx_before": "",
-   "ctx_after": "",
-   "match": "迷惑をかけ",
-   "answer_text": ""
-  }
- ],
+ "kakeru-meiwaku": [],
  "toru-shashin": [
-  {
-   "id": "2022-07-listening-point-05",
-   "level": "n1",
-   "source": "JLPT N1 2022年7月 聴解 問題1(5)",
-   "jp": "庭園で集合写真を撮る",
-   "ctx_before": "",
-   "ctx_after": "",
-   "match": "写真を撮",
-   "answer_text": ""
-  },
-  {
-   "id": "2014-07-listening-point-02",
-   "level": "n1",
-   "source": "JLPT N1 2014年7月 聴解 問題1(2)",
-   "jp": "自分で写真を撮る",
-   "ctx_before": "",
-   "ctx_after": "",
-   "match": "写真を撮",
-   "answer_text": ""
-  },
   {
    "id": "2014-12-grammar-choice-33",
    "level": "n1",
    "source": "JLPT N1 2014年12月 言語知識(文法) 問題5(33)",
    "jp": "バスの窓から大きな虹が見えたので写真を撮った。",
-   "ctx_before": "",
-   "ctx_after": "",
-   "match": "写真を撮",
-   "answer_text": ""
-  },
-  {
-   "id": "2012-12-listening-point-02",
-   "level": "n1",
-   "source": "JLPT N1 2012年12月 聴解 問題1(2)",
-   "jp": "証明写真を撮る",
    "ctx_before": "",
    "ctx_after": "",
    "match": "写真を撮",
@@ -221,16 +160,6 @@
    "answer_text": ""
   },
   {
-   "id": "2019-12-vocab-usage-23",
-   "level": "n1",
-   "source": "JLPT N1 2019年12月 言語知識(文字・語彙) 問題4(23)",
-   "jp": "年を取っても体力がくじけない",
-   "ctx_before": "",
-   "ctx_after": "",
-   "match": "年を取",
-   "answer_text": ""
-  },
-  {
    "id": "2012-07-reading-short-46",
    "level": "n1",
    "source": "JLPT N1 2012年7月 読解 問題8(46)",
@@ -286,18 +215,7 @@
    "answer_text": "とか"
   }
  ],
- "ageru-level": [
-  {
-   "id": "2010-12-listening-grammar-01",
-   "level": "n1",
-   "source": "JLPT N1 2010年12月 聴解 問題2(1)",
-   "jp": "人事評価を上げるため",
-   "ctx_before": "",
-   "ctx_after": "",
-   "match": "評価を上げ",
-   "answer_text": ""
-  }
- ],
+ "ageru-level": [],
  "ageru-rei": [
   {
    "id": "2022-12-reading-long-57",
@@ -356,26 +274,6 @@
  ],
  "motsu-kyoumi": [
   {
-   "id": "2016-12-reading-long-63",
-   "level": "n1",
-   "source": "JLPT N1 2016年12月 読解 問題11(63)",
-   "jp": "れば、相手もやがて心を開いて話し始めるだろう。そうなれば、雑談も意味のある時間となる。 (注) 話に乗る：ここでは、話に興味を持つ  i  雑談の良い点について、AとBはどのように述べているか。",
-   "ctx_before": "",
-   "ctx_after": "",
-   "match": "興味を持",
-   "answer_text": ""
-  },
-  {
-   "id": "2016-12-reading-long-64",
-   "level": "n1",
-   "source": "JLPT N1 2016年12月 読解 問題11(64)",
-   "jp": "れば、相手もやがて心を開いて話し始めるだろう。そうなれば、雑談も意味のある時間となる。 (注) 話に乗る：ここでは、話に興味を持つ  i  雑談をするときの姿勢について、AとBはどのように述べているか。",
-   "ctx_before": "",
-   "ctx_after": "",
-   "match": "興味を持",
-   "answer_text": ""
-  },
-  {
    "id": "2011-12-reading-mid-52",
    "level": "n1",
    "source": "JLPT N1 2011年12月 読解 問題9(52)",
@@ -407,26 +305,6 @@
   }
  ],
  "kiku-ongaku": [
-  {
-   "id": "2010-07-vocab-usage-25",
-   "level": "n1",
-   "source": "JLPT N1 2010年7月 言語知識(文字・語彙) 問題4(25)",
-   "jp": "この音楽を聞くと、気持ちがとても満喫",
-   "ctx_before": "",
-   "ctx_after": "",
-   "match": "音楽を聞",
-   "answer_text": ""
-  },
-  {
-   "id": "2019-12-n3-s00-unknown-34",
-   "level": "n3",
-   "source": "JLPT N3 2019年12月",
-   "jp": "好きな音楽を聞いているとき、気持ちが落ち着いている。",
-   "ctx_before": "",
-   "ctx_after": "",
-   "match": "音楽を聞",
-   "answer_text": "好きな音楽を聞いているとき、気持ちが落ち着いている。"
-  },
   {
    "id": "2018-07-n4-s00-unknown-69",
    "level": "n4",
@@ -461,26 +339,6 @@
    "answer_text": ""
   },
   {
-   "id": "2022-12-listening-point-01",
-   "level": "n1",
-   "source": "JLPT N1 2022年12月 聴解 問題1(1)",
-   "jp": "経験者に話を聞く",
-   "ctx_before": "",
-   "ctx_after": "",
-   "match": "話を聞",
-   "answer_text": ""
-  },
-  {
-   "id": "2016-07-listening-point-06",
-   "level": "n1",
-   "source": "JLPT N1 2016年7月 聴解 問題1(6)",
-   "jp": "営業担当者に話を聞く",
-   "ctx_before": "",
-   "ctx_after": "",
-   "match": "話を聞",
-   "answer_text": ""
-  },
-  {
    "id": "2013-07-vocab-paraphrase-18",
    "level": "n1",
    "source": "JLPT N1 2013年7月 言語知識(文字・語彙) 問題3(18)",
@@ -501,22 +359,42 @@
    "answer_text": ""
   },
   {
-   "id": "2011-12-listening-point-05",
-   "level": "n1",
-   "source": "JLPT N1 2011年12月 聴解 問題1(5)",
-   "jp": "地元農家の話を聞く",
-   "ctx_before": "",
-   "ctx_after": "",
-   "match": "話を聞",
-   "answer_text": ""
-  },
-  {
    "id": "2023-07-reading-long-57",
    "level": "n1",
    "source": "JLPT N1 2023年7月 読解 問題10(57)",
    "jp": "僕らの話を聞いていて、彼は思うところがあり、だからどこかへ行ってしまったのだろう、と。",
    "ctx_before": "それを見て僕らは呆気にとられながらも、ロボピーに意思を感じてしまった。",
    "ctx_after": "もちろんそれは、ロボピーの中のあるプログラムが、何かをきっかけに作動しただけのことだ。",
+   "match": "話を聞",
+   "answer_text": ""
+  },
+  {
+   "id": "2023-07-reading-long-61",
+   "level": "n1",
+   "source": "JLPT N1 2023年7月 読解 問題11(61)",
+   "jp": "A\n私は普段からメモ魔ですが、人の講演に行くと、必死にメモを取りながら話を聞きます。",
+   "ctx_before": "",
+   "ctx_after": "せっかくその場にいるのだから、最大限吸収して帰ろうと考えます・あるいは友達とくだらない話をしている時でも、「あれ？",
+   "match": "話を聞",
+   "answer_text": ""
+  },
+  {
+   "id": "2023-07-reading-long-60",
+   "level": "n1",
+   "source": "JLPT N1 2023年7月 読解 問題11(60)",
+   "jp": "B\n話を聞いている時に、視線も上げずにただひたすらメモを取っている人がいる。",
+   "ctx_before": "こうして意識化・可視化することが大切なのです。",
+   "ctx_after": "熱心さは伝わるが、質問もされないと興味や関心を持って聞いてもらえているのか不安になる。",
+   "match": "話を聞",
+   "answer_text": ""
+  },
+  {
+   "id": "2014-07-reading-long-61",
+   "level": "n1",
+   "source": "JLPT N1 2014年7月 読解 問題10(61)",
+   "jp": "旅の話を聞きながら、窓の外を眺めていて、ちょっとびっくりした。",
+   "ctx_before": "旅のにおいをまだ濃厚に漂わせている人を到着口で迎え、いっしょに列車に乗り込んだ。",
+   "ctx_after": "旅から帰って見る景色とぜんぜん違う。",
    "match": "話を聞",
    "answer_text": ""
   }
@@ -591,36 +469,6 @@
  "miru-yume": [],
  "hiku-kaze": [
   {
-   "id": "2022-07-vocab-usage-25",
-   "level": "n1",
-   "source": "JLPT N1 2022年7月 言語知識(文字・語彙) 問題4(25)",
-   "jp": "若いころは体が丈夫で断じて風邪をひくこともなかったが、最近すっかり弱くなった。",
-   "ctx_before": "",
-   "ctx_after": "",
-   "match": "風邪をひ",
-   "answer_text": ""
-  },
-  {
-   "id": "2014-12-vocab-usage-25",
-   "level": "n1",
-   "source": "JLPT N1 2014年12月 言語知識(文字・語彙) 問題4(25)",
-   "jp": "年の冬はひどい風邪をひいてしまい、仕事になかなか復旧",
-   "ctx_before": "",
-   "ctx_after": "",
-   "match": "風邪をひ",
-   "answer_text": ""
-  },
-  {
-   "id": "2024-07-vocab-usage-22",
-   "level": "n1",
-   "source": "JLPT N1 2024年7月 言語知識(文字・語彙) 問題4(22)",
-   "jp": "旅行の前日に風邪をひいてしまいホテルの予約を撤回した。",
-   "ctx_before": "",
-   "ctx_after": "",
-   "match": "風邪をひ",
-   "answer_text": ""
-  },
-  {
    "id": "2025-07-n2-s02-vocab-writing-02",
    "level": "n2",
    "source": "JLPT N2 2025年7月 問題2(2)",
@@ -629,26 +477,6 @@
    "ctx_after": "",
    "match": "風邪をひ",
    "answer_text": "傾向"
-  },
-  {
-   "id": "2020-12-n3-s00-unknown-33",
-   "level": "n3",
-   "source": "JLPT N3 2020年12月",
-   "jp": "栄養が足りないと風邪を引きやすくなるから、食事には気を付けている。",
-   "ctx_before": "",
-   "ctx_after": "",
-   "match": "風邪を引",
-   "answer_text": ""
-  },
-  {
-   "id": "2017-07-n3-s00-unknown-32",
-   "level": "n3",
-   "source": "JLPT N3 2017年7月",
-   "jp": "弟の風邪を引き受けたようで、わたしも熱が出てきた。",
-   "ctx_before": "",
-   "ctx_after": "",
-   "match": "風邪を引",
-   "answer_text": ""
   }
  ],
  "hiku-jisho": [],
@@ -698,72 +526,10 @@
    "ctx_after": "論理的に正しいことを理性と呼ぶとすれば、理性的にあることができるのは強者だからです。",
    "match": "嘘をつ",
    "answer_text": ""
-  },
-  {
-   "id": "2020-12-vocab-usage-25",
-   "level": "n1",
-   "source": "JLPT N1 2020年12月 言語知識(文字・語彙) 問題4(25)",
-   "jp": "嘘をつかず、実に",
-   "ctx_before": "",
-   "ctx_after": "",
-   "match": "嘘をつ",
-   "answer_text": ""
   }
  ],
- "tsuku-kizu": [
-  {
-   "id": "2022-07-listening-grammar-04",
-   "level": "n1",
-   "source": "JLPT N1 2022年7月 聴解 問題2(4)",
-   "jp": "魚に傷がつかな〈なったこと",
-   "ctx_before": "",
-   "ctx_after": "",
-   "match": "傷がつ",
-   "answer_text": ""
-  }
- ],
- "deru-ie": [
-  {
-   "id": "2023-07-n2-s06-問題6-01",
-   "level": "n2",
-   "source": "JLPT N2 2023年7月 問題6(1)",
-   "jp": "明日の機は (早期) の便だから、朝5時に家を出なければならない。",
-   "ctx_before": "",
-   "ctx_after": "",
-   "match": "家を出",
-   "answer_text": "医療の進歩によって、病気を (早期) の段階で見つけられるようになった。"
-  },
-  {
-   "id": "2018-07-n3-s00-unknown-35",
-   "level": "n3",
-   "source": "JLPT N3 2018年7月",
-   "jp": "妹より後に家を出たが、駅の近くで追いついた。",
-   "ctx_before": "",
-   "ctx_after": "",
-   "match": "家を出",
-   "answer_text": ""
-  },
-  {
-   "id": "2018-12-n3-s00-unknown-23",
-   "level": "n3",
-   "source": "JLPT N3 2018年12月",
-   "jp": "寝坊して慌て家を出たので、（ ? ）携帯電話を忘れてきてしまった",
-   "ctx_before": "",
-   "ctx_after": "",
-   "match": "家を出",
-   "answer_text": ""
-  },
-  {
-   "id": "2024-07-n3-s05-vocab-usage-04",
-   "level": "n3",
-   "source": "JLPT N3 2024年7月 問題5(4)",
-   "jp": "寝坊をして、あわてて家を出たので、携帯電話を忘れてきてしまった。",
-   "ctx_before": "",
-   "ctx_after": "",
-   "match": "家を出",
-   "answer_text": "寝坊をして、あわてて家を出たので、携帯電話を忘れてきてしまった。"
-  }
- ],
+ "tsuku-kizu": [],
+ "deru-ie": [],
  "deru-tv": [],
  "deru-shiken": [],
  "deru-kekka": [
