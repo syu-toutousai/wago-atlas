@@ -9,7 +9,8 @@
 - 数据：`data/hojodoushi.json`（D1 20）・`data/setsuzoku.json`（D2 116）・
   `data/fukushi.json`（D3 121）・`data/keishiki.json`（D4 40）・`data/onomatope.json`（D5 82）・`data/wago-doushi.json`（D6 38）・`data/shijishi.json`（D7 32）・
   `data/dimensions.json`（维度目录）・`data/exams/*.json`（真题命中，带出典）
-- 数据源：本地真题库 `../jlpt-question-bank/`（N2-N5）＋ `../jlpt-n1-question-bank/`（N1）
+- 数据源：本地合并真题库 `../jlpt-question-bank/`（N2-N5 在根 `past-exams/`；N1 在 `n1/past-exams/`）
+  · 线上入口 <https://syu-toutousai.github.io/jlpt-question-bank/>（N1–N5 单站）
 
 ## 已收录维度
 

@@ -12,7 +12,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 BANKS = {
-    "n1": Path("/home/naruto/scratch/jlpt-n1-question-bank/past-exams"),
+    "n1": Path("/home/naruto/scratch/jlpt-question-bank/n1/past-exams"),
     "n2": Path("/home/naruto/scratch/jlpt-question-bank/past-exams/n2"),
     "n3": Path("/home/naruto/scratch/jlpt-question-bank/past-exams/n3"),
     "n4": Path("/home/naruto/scratch/jlpt-question-bank/past-exams/n4"),
