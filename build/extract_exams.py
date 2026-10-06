@@ -103,6 +103,10 @@ def word_pattern(word):
 
 CTX_BAD = re.compile(r"選びなさい|最もよい|最も適当|記号|1・2・3・4")
 BAD_FRAG = re.compile(r"[（(]\s*[）)]|[（(]\d{1,3}[）)]|\[\d{1,2}\]|★")
+# 読解設問句の語尾（語料红线：設問・選項句はコーパスに入れない）
+QUESTION_TAIL = re.compile(
+    r"(?:なぜ|どれ|どのようなもの|どういうこと|何を意味する|筆者の考え|合うもの|"
+    r"説明したもの|最もよいもの|当てはまるもの)か[。？]$")
 
 
 def split_sentences(text):
@@ -122,6 +126,8 @@ def match_sentences(slist, pat, max_len=160):
             continue
         # 空欄・並べ替えマーカーを含む断片と、文として完結しない断片は除外
         if BAD_FRAG.search(s) or not s.endswith(("。", "！", "？")):
+            continue
+        if QUESTION_TAIL.search(s):
             continue
         out.append((idx, s))
     return out
@@ -193,13 +199,14 @@ def main():
         if isinstance(bl, dict):
             bl = list(bl.keys())
         blocked = set(bl)
-        compiled = {}
+        compiled, guards = {}, {}
         for it in items:
             if it.get("extract") is False:
                 compiled[it["id"]] = None
                 continue
             pat = it.get("match") or STRICT.get(it["id"]) or OVERRIDES.get(it["id"]) or word_pattern(it["word"])
             compiled[it["id"]] = re.compile(pat) if pat else None
+            guards[it["id"]] = re.compile(it["guard"]) if it.get("guard") else None
 
         for level, root in BANKS.items():
             if not root.exists():
@@ -225,6 +232,9 @@ def main():
 
                     def usable(i, s):
                         if s in blocked or f"{level}:{s}" in seen[it["id"]]:
+                            return False
+                        g = guards.get(it["id"])
+                        if g and not g.search(s):
                             return False
                         mm = pat.search(s)
                         return not (mm and inside_longer(s, mm.group(0), mm.start(), own, all_words))

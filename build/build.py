@@ -333,11 +333,14 @@ def build_questions(items, exams_by_id, audio):
             jp = e["jp"]
             blanked = None
             pat = BLANKS.get(iid) or it.get("match") or _word_pattern(it["word"])
-            if pat:
+            # 共起ガード（例: 〜ことか は どんなに/どれほど/なんと と共起したときだけ感叹句型）
+            guard = it.get("guard")
+            guarded = (not guard) or bool(re.search(guard, jp))
+            if pat and guarded:
                 m2 = re.search(pat, jp)
                 if m2:
                     blanked = jp[:m2.start()] + "（　）" + jp[m2.end():]
-            if not blanked and e.get("match") and e["match"] in jp:
+            if not blanked and guarded and e.get("match") and e["match"] in jp:
                 blanked = jp.replace(e["match"], "（　）", 1)
             if not blanked:
                 continue  # 无法安全挖空则不出题（语料仍在真題 Tab 展示）
@@ -354,7 +357,7 @@ def build_questions(items, exams_by_id, audio):
                    f"{hint}"
                    f"<div class='hint'>出典：{e['source']}</div>"),
                 opts=opts, ans=opts.index(it["word"]),
-                exp=f"正解：{it['word']}＝{it['meaning']}<br>原句：{jp}<br>出典：{e['source']}")
+                exp=f"正解：{it['word']}＝{it['meaning']}<br>🔧 {it.get('engine','')}<br>原句：{jp}<br>出典：{e['source']}")
     return qs
 
 
