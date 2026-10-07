@@ -43,15 +43,15 @@ BANK_META = [
 
 # 例文中の補助動詞部分を（　）にする regex（id → pattern）
 BLANKS = {
-    "te-miru": r"[てで]み(て|る|た|ます)",
+    "te-miru": r"[てで]み(て|る|た|ます|よう)",
     "te-oku": r"[てで]お(いて|く|いた|き)",
-    "te-shimau": r"[てで]しま(った|う)|ちゃ(った|う)|じゃ(った|う)",
+    "te-shimau": r"[てで]しま(った|う|い)|ちゃ(った|う)|じゃ(った|う)",
     "te-iru": r"[てで]い(る|た|ます)",
     "te-aru": r"[てで]あ(る)",
     "te-kuru": r"[てで](き|く)(た|る|て|ます)",
     "te-iku": r"[てで](い|き)(った|く|て)",
     "te-kureru": r"[てで]くれ(た|る|て)|[てで]くださ(った|る|い)",
-    "te-morau": r"[てで]もら(った|う|い)|[てで]いただ(いた|く|き)",
+    "te-morau": r"[てで]もら(った|う|い|って)|[てで]いただ(いた|く|き)",
     "te-ageru": r"[てで]あげ(た|る|て)|[てで]さしあげ(た|る)",
     "te-yaru": r"[てで]や(った|る|り)",
     "te-miseru": r"[てで]みせ(た|る|て)",
@@ -59,11 +59,80 @@ BLANKS = {
     "tsuzukeru": r"続け(た|る|て)",
     "owaru": r"終わ(った|る|って)",
     "kiru": r"切(った|る|って)",
-    "komu": r"込(んだ|む|んで)",
-    "nuku": r"抜(いた|く|いて)",
+    "komu": r"込(んだ|む|んで|み)",
+    "nuku": r"抜(いた|く|いて|き)",
     "kakeru": r"かけ(た|る|て)",
     "naosu": r"直(した|す|して)",
 }
+
+
+# 補助動詞の活用（空欄の前後関係に合わせて選択肢を活用させる）
+_AUX_ICHIDAN = {"みる", "いる", "くれる", "あげる", "みせる", "始める", "続ける", "かける"}
+_AUX_GODAN = {
+    "う": ("って", "った", "い", "おう"), "く": ("いて", "いた", "き", "こう"),
+    "ぐ": ("いで", "いだ", "ぎ", "ごう"), "す": ("して", "した", "し", "そう"),
+    "つ": ("って", "った", "ち", "とう"), "ぬ": ("んで", "んだ", "に", "のう"),
+    "む": ("んで", "んだ", "み", "もう"), "ぶ": ("んで", "んだ", "び", "ぼう"),
+    "る": ("って", "った", "り", "ろう"),
+}
+_AUX_GODAN_KNOWN = {"おく", "しまう", "ある", "もらう", "やる", "終わる", "切る", "込む", "抜く", "直す"}
+_AUX_CATS = ("dict", "past", "te", "reny", "masu", "vol")
+
+
+def split_aux(word):
+    w = (word or "").replace("〜", "")
+    return (w[:1], w[1:]) if w.startswith("て") else ("", w)
+
+
+def conjugate_aux(verb, cat):
+    if verb == "する":
+        return {"dict": "する", "past": "した", "te": "して", "reny": "し",
+                "masu": "します", "vol": "しよう"}.get(cat)
+    if verb == "くる":
+        return {"dict": "くる", "past": "きた", "te": "きて", "reny": "き",
+                "masu": "きます", "vol": "こよう"}.get(cat)
+    if verb == "いく":
+        return {"dict": "いく", "past": "いった", "te": "いって", "reny": "いき",
+                "masu": "いきます", "vol": "いこう"}.get(cat)
+    if verb in _AUX_ICHIDAN:
+        s = verb[:-1]
+        return {"dict": verb, "past": s + "た", "te": s + "て", "reny": s,
+                "masu": s + "ます", "vol": s + "よう"}.get(cat)
+    if verb not in _AUX_GODAN_KNOWN:
+        return None
+    t = _AUX_GODAN.get(verb[-1])
+    if not t:
+        return None
+    te, past, reny, vol = t
+    return {"dict": verb, "past": verb[:-1] + past, "te": verb[:-1] + te,
+            "reny": verb[:-1] + reny, "masu": verb[:-1] + reny + "ます",
+            "vol": verb[:-1] + vol}.get(cat)
+
+
+def aux_form(word, surface):
+    """空欄の表層が補助動詞のどの活用形か判定する。→ (接続の て/で, 活用カテゴリ)"""
+    if not surface:
+        return None, None
+    prefix, verb = split_aux(word)
+    if prefix == "て":
+        if surface[:1] not in ("て", "で"):
+            return None, None
+        conn, rest = surface[:1], surface[1:]
+    else:
+        conn, rest = "", surface
+    for cat in _AUX_CATS:
+        f = conjugate_aux(verb, cat)
+        if f is not None and f == rest:
+            return conn, cat
+    return None, None
+
+
+def aux_label(word, conn, cat):
+    prefix, verb = split_aux(word)
+    f = conjugate_aux(verb, cat)
+    if f is None:
+        return None
+    return (conn or "") + f if prefix == "て" else f
 
 
 def j(obj):
@@ -238,14 +307,15 @@ def _word_pattern(word):
 
 
 def blank_example(it):
+    """例文の補助動詞部分を空欄化する → (空欄文, 元の表層形, 原文)。"""
     ex = (it.get("examples") or [{}])[0]
     jp = ex.get("jp", "")
     pat = BLANKS.get(it["id"]) or it.get("match") or _word_pattern(it["word"])
     if pat:
-        out = re.sub(pat, "（　）", jp, count=1)
-        if out != jp:
-            return out
-    return jp
+        m = re.search(pat, jp)
+        if m:
+            return jp[:m.start()] + "（　）" + jp[m.end():], m.group(0), jp
+    return jp, None, jp
 
 
 def build_questions(items, exams_by_id, audio):
@@ -288,6 +358,36 @@ def build_questions(items, exams_by_id, audio):
                     break
         return out[:count]
 
+    def inflect_opts(it, surface, distract):
+        """補助動詞（D1）は空欄の表層と同じ活用形・同じ接続クラスの選択肢に揃える。"""
+        if it.get("dim") == "hojodoushi":
+            conn, cat = aux_form(it["word"], surface) if surface else (None, None)
+            if cat is None:
+                return None, None
+            own = it["word"].replace("〜", "")
+            is_te = own.startswith("て")  # テ形系か連用形系か（スロットの接続クラス）
+            correct = aux_label(it["word"], conn if is_te else "", cat)
+            # 同じ接続クラスの補助動詞だけを選択肢にする
+            # （テ形スロットに連用形系＝降っ始め、連用形スロットにテ形系＝使いておいて は不成立）
+            pool = [x["word"] for x in items
+                    if x["id"] != it["id"] and x.get("dim") == it.get("dim")
+                    and x.get("word", "").replace("〜", "").startswith("て") == is_te]
+            rng.shuffle(pool)
+            seen, opts = {correct}, [correct]
+            for w in pool:
+                lbl = aux_label(w, conn if is_te else "", cat)
+                if not lbl or lbl in seen:
+                    continue
+                seen.add(lbl)
+                opts.append(lbl)
+                if len(opts) == 4:
+                    break
+            rng.shuffle(opts)
+            return opts, opts.index(correct)
+        opts = [it["word"]] + list(distract)
+        rng.shuffle(opts)
+        return opts, opts.index(it["word"])
+
     for it in items:
         iid = it["id"]
         dim_name = it.get("dimName", "和語")
@@ -296,14 +396,14 @@ def build_questions(items, exams_by_id, audio):
             opts=[it["meaning"]] + others_dim(it, "meaning"),
             ans=0,
             exp=f"{it['word']}＝{it['meaning']}<br>🔧 {it['engine']}<br>🧭 {it['blueprint']}")
-        bl = blank_example(it)
+        bl, surf, _ = blank_example(it)
         if "（　）" in bl:
-            opts = [it["word"]] + others_dim(it, "word")
-            rng.shuffle(opts)
-            add("fill", f"{iid}:fill",
-                q=f"（　）に入る〈{dim_name}〉は？<br><span class='jp'>{bl}</span>",
-                opts=opts, ans=opts.index(it["word"]),
-                exp=f"原句：{it['examples'][0]['jp']}<br>{it['examples'][0].get('cn','')}<br>🔧 {it['engine']}")
+            opts, ans = inflect_opts(it, surf, others_dim(it, "word"))
+            if opts:
+                add("fill", f"{iid}:fill",
+                    q=f"（　）に入る〈{dim_name}〉は？<br><span class='jp'>{bl}</span>",
+                    opts=opts, ans=ans,
+                    exp=f"原句：{it['examples'][0]['jp']}<br>{it['examples'][0].get('cn','')}<br>🔧 {it['engine']}")
         ex0 = it["examples"][0]
         if f"{iid}-e0" in audio:
             opts = [it["word"]] + others_dim(it, "word")
@@ -332,6 +432,7 @@ def build_questions(items, exams_by_id, audio):
         for n, e in enumerate(exams_by_id.get(iid, [])):
             jp = e["jp"]
             blanked = None
+            surface = None
             pat = BLANKS.get(iid) or it.get("match") or _word_pattern(it["word"])
             # 共起ガード（例: 〜ことか は どんなに/どれほど/なんと と共起したときだけ感叹句型）
             guard = it.get("guard")
@@ -339,13 +440,17 @@ def build_questions(items, exams_by_id, audio):
             if pat and guarded:
                 m2 = re.search(pat, jp)
                 if m2:
+                    surface = m2.group(0)
                     blanked = jp[:m2.start()] + "（　）" + jp[m2.end():]
-            if not blanked and guarded and e.get("match") and e["match"] in jp:
+            # 補助動詞の match は活用した断片（割り切れ 等）のことがあるため、match 代用挖空はしない
+            if not blanked and guarded and e.get("match") and e["match"] in jp and iid not in BLANKS:
+                surface = e["match"]
                 blanked = jp.replace(e["match"], "（　）", 1)
             if not blanked:
                 continue  # 无法安全挖空则不出题（语料仍在真題 Tab 展示）
-            opts = [it["word"]] + others_dim(it, "word")
-            rng.shuffle(opts)
+            opts, ans = inflect_opts(it, surface, others_dim(it, "word"))
+            if not opts:
+                continue  # 活用形が判定できない補助動詞は出題しない（語料は真題 Tab に残る）
             cb = e.get("ctx_before", "")
             ca = e.get("ctx_after", "")
             ctxb_html = f"<div class='ctx'>{cb}</div>" if cb else ""
@@ -356,7 +461,7 @@ def build_questions(items, exams_by_id, audio):
                    f"{ctxb_html}<span class='jp'>{blanked}</span>{ctxa_html}"
                    f"{hint}"
                    f"<div class='hint'>出典：{e['source']}</div>"),
-                opts=opts, ans=opts.index(it["word"]),
+                opts=opts, ans=ans,
                 exp=f"正解：{it['word']}＝{it['meaning']}<br>🔧 {it.get('engine','')}<br>原句：{jp}<br>出典：{e['source']}")
     return qs
 
