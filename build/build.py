@@ -146,6 +146,13 @@ def load_data():
         dd = json.loads(dim_file.read_text(encoding="utf-8"))
         for d in dd.get("dimensions", []):
             dimensions[d["id"]] = d
+    nade = {}
+    nade_dir = ROOT / "data" / "nade"
+    if nade_dir.exists():
+        for f in sorted(nade_dir.glob("*.json")):
+            nd = json.loads(f.read_text(encoding="utf-8"))
+            for k, v in nd.items():
+                nade.setdefault(k, []).extend(v)
     items = []
     for f in sorted((ROOT / "data").glob("*.json")):
         if f.name == "dimensions.json" or f.parent.name == "exams":
@@ -157,7 +164,13 @@ def load_data():
             it = dict(it)
             it["dim"] = dim_id
             it["dimName"] = dim_name
+            clips = nade.pop(it["id"], None)
+            if clips:
+                it["nadeshiko"] = (it.get("nadeshiko") or []) + clips
             items.append(it)
+    if nade:
+        stray = ", ".join(sorted(nade)[:10])
+        print(f"[!] data/nade: {len(nade)} orphan ids (no matching item): {stray}")
     exams = {}
     for f in sorted((ROOT / "data" / "exams").glob("*.json")):
         try:
@@ -484,8 +497,8 @@ header h1{font-size:24px} header .kana{opacity:.92;font-size:14px;margin-top:6px
 header .tags span{display:inline-block;background:rgba(255,255,255,.22);border-radius:99px;
 padding:2px 10px;font-size:12px;margin:10px 6px 0 0}
 .wrap{max-width:880px;margin:0 auto;padding:0 16px}
-nav{display:flex;gap:8px;margin:-18px 0 16px;position:relative;z-index:2}
-nav button{flex:1;border:none;border-radius:12px;padding:12px 2px;font-size:14px;cursor:pointer;
+nav{display:flex;gap:8px;margin:-18px 0 16px;position:relative;z-index:2;flex-wrap:wrap}
+nav button{flex:1 1 88px;border:none;border-radius:12px;padding:12px 2px;font-size:14px;cursor:pointer;
 background:var(--card);box-shadow:0 2px 10px rgba(30,40,90,.08);color:var(--sub);font-weight:600}
 nav button.on{background:var(--ink);color:#fff}
 .card{background:var(--card);border-radius:16px;padding:18px;margin-bottom:14px;
@@ -586,6 +599,22 @@ box-shadow:0 2px 10px rgba(30,40,90,.06);border-left:4px solid var(--ng)}
 .exam-src{font-size:11.5px;color:var(--sub)}
 .src{display:inline-block;border-radius:99px;padding:1px 8px;font-size:10.5px;font-weight:700;vertical-align:1px}
 .src-jlpt{background:var(--ngbg);color:var(--ng)}
+.src-nade{background:#ede7f6;color:#5e35b1}
+/* nadeshiko real-scene clips */
+.nclip{background:#faf5ff;border:1px solid #e0d0f0;border-radius:12px;padding:11px 12px;margin:9px 0}
+.nclip .nhdr{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:7px}
+.nclip .nmedia{font-weight:700;color:#5e35b1;font-size:13px}
+.nclip .nep{font-size:11.5px;color:var(--sub)}
+.nclip .nrow{display:flex;gap:10px;align-items:flex-start}
+.nclip .nthumb{width:96px;height:54px;border-radius:8px;object-fit:cover;flex:none;background:#e9e4f5}
+.nclip .njp{font-family:"Hiragino Mincho ProN","Yu Mincho","Noto Serif CJK JP",serif;
+font-size:15px;line-height:1.8;font-weight:600}
+.nclip .njp ruby rt{font-size:.52em;color:var(--sub)}
+.nclip .nen{font-size:12px;color:var(--sub);font-style:italic;margin-top:3px;line-height:1.6}
+.nclip .ncn{font-size:13px;color:var(--ink);margin-top:2px;line-height:1.7}
+.nclip .nlink{display:inline-block;margin-top:4px;color:#5e35b1;font-size:11.5px;text-decoration:none}
+.nclip .nlink:hover{text-decoration:underline}
+.chip.nade{background:#ede7f6;color:#5e35b1}
 a.jump{color:#0f766e;text-decoration:none;font-weight:700}
 a.jump:hover{text-decoration:underline}
 </style>
@@ -628,6 +657,16 @@ function play(id,btn){
   if(curBtn){curBtn.classList.add('playing');curAudio.onended=()=>curBtn.classList.remove('playing');}
   curAudio.play();
 }
+function playURL(url,btn){
+  if(!url)return;
+  if(curAudio){curAudio.pause();curAudio.currentTime=0;}
+  document.querySelectorAll('.btn').forEach(b=>b.classList.remove('playing'));
+  curAudio=new Audio(url);curBtn=btn||null;
+  if(curBtn){curBtn.classList.add('playing');
+    curAudio.onended=()=>curBtn.classList.remove('playing');
+    curAudio.onerror=()=>{curBtn.classList.remove('playing');curBtn.title='原声はオンライン時のみ再生できます';};}
+  curAudio.play().catch(()=>{if(curBtn)curBtn.classList.remove('playing');});
+}
 function rowHTML(iid,i){
   const ex=ITEMS.find(x=>x.id===iid).examples[i];
   const sid=`${iid}-e${i}`;
@@ -645,9 +684,23 @@ function examHTML(e){
       return n?`<a class="jump" href="javascript:goDetail('${id}')">${n.word}</a>`:id;}).join("、")}</div>`:""}
   </div>`;
 }
+function nadeHTML(sc){
+  const b=sc.audio?`<button class="btn mini-btn" onclick="playURL('${sc.audio}',this)">▶</button>`:"";
+  return `<div class="nclip">
+    <div class="nhdr"><span class="src src-nade">Nadeshiko</span>${b}
+      <span class="nmedia">${sc.media||""}</span>
+      <span class="nep">${sc.ep?sc.ep:""}${sc.at?" @ "+sc.at:""}</span></div>
+    <div class="nrow">
+      ${sc.thumb?`<img class="nthumb" loading="lazy" src="${sc.thumb}" alt="" onerror="this.style.display='none'">`:""}
+      <div><div class="njp">${sc.jp||""}</div>
+        ${sc.en?`<div class="nen">${sc.en}</div>`:""}
+        ${sc.cn?`<div class="ncn">${sc.cn}</div>`:""}
+        ${sc.url?`<a class="nlink" href="${sc.url}" target="_blank" rel="noopener">nadeshiko.co ↗</a>`:""}</div>
+    </div></div>`;
+}
 
 /* ---------- tabs ---------- */
-const TABS=[["list","🗺️ 一覧"],["detail","📖 詳解"],["exams","📝 真題"],["observe","📊 観測"],["quiz","🎯 クイズ"]];
+const TABS=[["list","🗺️ 一覧"],["detail","📖 詳解"],["nade","🎬 原声"],["exams","📝 真題"],["observe","📊 観測"],["quiz","🎯 クイズ"]];
 let tab="list";
 function renderNav(){
   $("#nav").innerHTML=TABS.map(([k,l])=>
@@ -685,7 +738,7 @@ function renderList(){
     <div class="mini-wrap">${members.map(n=>`
       <button class="mini" onclick="goDetail('${n.id}')">
         <div class="nm">${n.word}</div>
-        <div class="im"><span class="chip sub">${n.subtype}</span><span class="chip lv">${n.level}</span>${gramChip(n)}</div>
+        <div class="im"><span class="chip sub">${n.subtype}</span><span class="chip lv">${n.level}</span>${gramChip(n)}${(n.nadeshiko||[]).length?`<span class="chip nade">🎬 ${n.nadeshiko.length}</span>`:""}</div>
         <div class="im" style="margin-top:4px">${shortMean(n.meaning)}</div>
       </button>`).join("")}</div></div>`;
   });
@@ -717,10 +770,38 @@ function renderDetail(){
         <br>🔧 <b>Engine</b>　${n.engine}
         <br>🧭 <b>Blueprint</b>　${n.blueprint}</div>
       ${(n.examples||[]).map((_,i)=>rowHTML(iid,i)).join("")}
+      ${(n.nadeshiko&&n.nadeshiko.length)?`<h3 class="sec">🎬 Nadeshiko 実例（${n.nadeshiko.length}）</h3>
+        ${n.nadeshiko.map(nadeHTML).join("")}`:""}
       ${(n._exams&&n._exams.length)?`<h3 class="sec">📝 JLPT 出題（${n._exams.length}）</h3>`:""}
       ${(n._exams||[]).map(e=>examHTML(e)).join("")}
       ${n.note?`<div class="note">💡 ${n.note}</div>`:""}
     </div>`;
+    });
+  });
+  $("#main").innerHTML=h;
+}
+
+/* ---------- nadeshiko corpus ---------- */
+function renderNade(){
+  const total=ITEMS.reduce((s,n)=>s+((n.nadeshiko||[]).length),0);
+  const nItems=ITEMS.filter(n=>(n.nadeshiko||[]).length).length;
+  let h=`<div class="card intro"><h2>🎬 Nadeshiko 実写例句（${total} 段・${nItems} 条目）</h2>
+  <p>把和語機能語放回<b>真实动画・日剧台词</b>里：每条附作品・话数・时间戳・英文原文与中文解说，
+  点 ▶ 可听原声，点画面/链接可跳 nadeshiko.co 看上下句。原声与截图来自
+  <a href="https://nadeshiko.co" target="_blank" rel="noopener">Nadeshiko</a>（CDN 直链，オンライン時のみ再生）。</p>
+  <p class="hint">挑选基准：该词的规范用法（形式名詞は形式名詞、接続詞は接続詞），避开复合词内部的误命中；
+  真题句语料见「📝 真題」Tab。</p></div>`;
+  if(!total){h+=`<div class="card"><div class="hint">Nadeshiko 例句尚未收录——往 data/nade/ 里补，重建即自动生长。</div></div>`;}
+  dimList().forEach(dim=>{
+    const members=dimItems(dim.id).filter(n=>(n.nadeshiko||[]).length);
+    if(!members.length)return;
+    const cnt=members.reduce((s,n)=>s+n.nadeshiko.length,0);
+    h+=`<h2 class="dimhead">${dim.order} ${dim.name} <span class="hint">${members.length} 条目・${cnt} 段</span></h2>`;
+    members.forEach(n=>{
+      h+=`<h3 class="sec" style="border-left:4px solid #5e35b1;padding-left:8px;color:#5e35b1">
+        <a class="jump" style="color:#5e35b1" href="javascript:goDetail('${n.id}')">${n.word}</a>
+        <span class="hint">${n.subtype}｜${shortMean(n.meaning)}</span></h3>`;
+      h+=n.nadeshiko.map(nadeHTML).join("");
     });
   });
   $("#main").innerHTML=h;
@@ -914,6 +995,7 @@ function render(){
   if(tab!=="quiz")showNext(false);
   if(tab==="list")renderList();
   else if(tab==="detail")renderDetail();
+  else if(tab==="nade")renderNade();
   else if(tab==="exams")renderExams();
   else if(tab==="observe")renderObserve();
   else renderQuizTab();
@@ -937,9 +1019,13 @@ def main():
 
     display = copy.deepcopy(items)
     excopy = copy.deepcopy(exams)
+    nade_total = 0
     for it in display:
         for ex in it.get("examples") or []:
             ex["jp"] = add_furigana(ex["jp"])
+        for clip in it.get("nadeshiko") or []:
+            clip["jp"] = add_furigana(clip.get("jp", ""))
+            nade_total += 1
         it["_exams"] = []
     for lst in excopy.values():
         for e in lst:
@@ -955,7 +1041,9 @@ def main():
                 if it["id"] == tid:
                     it["_exams"].append(e2)
     tags = (f"<span>{len(items)} 型</span><span>{sum(len(v) for v in exams.values())} 真題句</span>"
-            f"<span>{len(audio)} 音声</span><span>N5〜N1</span><span>大和言葉レンズ</span>")
+            f"<span>{len(audio)} 音声</span>" +
+            (f"<span>{nade_total} Nadeshiko 原声</span>" if nade_total else "") +
+            f"<span>N5〜N1</span><span>大和言葉レンズ</span>")
     origins = {"wago": 0, "kango": 0, "mixed": 0}
     for it in display:
         key = it.get("origin", "wago")

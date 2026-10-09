@@ -26,6 +26,23 @@
 
 每条带：**Engine**（実語→機能語の文法化説明）・**Blueprint**（一句话机制）・
 例句＋TTS・**JLPT 真题命中句**（N1-N5，出处注明）。真题命中合计 **1703 句**。
+其中 **432 条目附 Nadeshiko 実写例句（合计 860 段）**——真实动画/日剧台词＋缩略图・原声・
+EN 原文・中文解说，见页面「🎬 原声」Tab 与各条目詳解卡。
+
+## Nadeshiko 実写例句（D1〜D7）
+
+把每条和語機能語放回**真实作品语境**里验证：`data/nade/*.json` 按条目 id 存片段
+（jp 行内振假名・media・EP/时间戳・audio/thumb URL・EN・cn 解说），build 时合并进条目，
+在 詳解 与「🎬 原声」Tab 显示场景卡。
+
+- 覆盖：447 条目中 **432 条目・860 段**；未收录者为 Nadeshiko 无命中（とぼとぼ・しとしと等）
+  或过于泛用难以验证的句式（〜て・〜が早いか・それが等）。
+- 挑选基准：该词的**规范用法**（形式名詞は形式名詞、接続詞は接続詞、接続助詞は用言後続…），
+  token 形态素验证＋人工校阅，避开复合词内部误命中。
+- 音频/画面为 **Nadeshiko CDN 直链**：在线时 ▶ 播放原声、点缩略图/链接跳 nadeshiko.co；
+  离线时句子・译文・解说照常可读（HTML 体积保持轻量）。
+- 增补：`python3 build/fetch_nade.py --fetch/--candidates/--pick` → 校阅 →
+  `--apply` 注入 cn → `python3 build/build.py`（详见 `AGENTS.md` §3.5）。
 
 ## 文法化度（補助動詞）
 
@@ -58,6 +75,9 @@ python3 build/extract_exams.py   # 本地 N1-N5 题库 → data/exams/*.json（�
 python3 build/build.py           # TTS 合成 + 题库生成 + 单文件 index.html
 ```
 
+（Nadeshiko 例句素材の収集は `python3 build/fetch_nade.py --fetch` から。
+手順は `AGENTS.md` §3.5。）
+
 ## 题库（六层・3910 問）
 
 📝 真題句 1678・✍️ 穴埋め 444・📘 意味認識 447・🎧 聴解判別 447・🎧 意味理解 447・🎧 書き取り 447
@@ -87,3 +107,7 @@ python3 build/build.py           # TTS 合成 + 题库生成 + 单文件 index.h
 真题命中句来自公开学习站点的考生回忆整理，**全部注明出处（年份·级别·题号）**。
 按用户判定：打乱顺序、重建为观测维度并注明出处的引用不涉及版权问题；
 本 repo 只做个人学习用途。
+
+Nadeshiko 台词/原声/缩略图来自 **Nadeshiko**（<https://nadeshiko.co>，BrigadaSOS，AGPL-3.0）
+语料库，以 CDN 直链引用；作品名・话数・时间戳随卡标注，仅作个人语言学习之非商业性引用，
+著作权归各版权方与 Nadeshiko 所有。

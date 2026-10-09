@@ -45,8 +45,37 @@ python3 build/extract_exams.py   # 题库 → data/exams/（带出典）
 python3 build/build.py           # → index.html（单文件离线）
 ```
 
-- TTS 内容寻址缓存于 `audio/`（可提交）；`nade_audio/` gitignore。
-- 新条目：往 `data/hojodoushi.json` 加一条，重跑 build；真题挂接自动生效。
+- TTS 内容寻址缓存于 `audio/`（可提交）；`nade_audio/` gitignore（予約、現未使用）。
+- 新条目：往 `data/<dim>.json` 加一条，重跑 build；真题挂接自动生效。
+- Nadeshiko 実写例句：`data/nade/<dim>.json` に条目 id ごとのクリップ配列。
+  `build.py` が `data/*.json` の item に merge し、`jp` に ruby を付けて
+  「🎬 原声」Tab と 詳解カードに表示する（下記 §3.5）。
+
+## 3.5 Nadeshiko 実写例句（data/nade/*.json）
+
+各条目に**真实动画・日剧台词**（缩略图＋原声＋EN/中文解说）を付ける層。
+素材はローカル CLI `nadeshiko search`（nadeshiko.co, AGPL-3.0）から取得し、
+**CDN 直リンク**で表示する（音声/画像はオンライン時のみ；HTML は軽量のまま）。
+
+```bash
+python3 build/fetch_nade.py --fetch        # 各条目 search → /tmp/opencode/nade/raw 缓存（nadeshiko CLI）
+python3 build/fetch_nade.py --candidates   # token 検証＋採点 → /tmp/opencode/nade/cand/<dim>.json
+python3 build/fetch_nade.py --pick -n 2    # 上位を data/nade/<dim>.json へ（cn は空）
+# 校阅（/tmp/opencode/nade/picks.json で sid 指定の差し替え・`[]` で不収録）
+python3 build/fetch_nade.py --apply /tmp/opencode/nade/cn/<dim>.json   # {sid: cn} を注入
+python3 build/build.py
+```
+
+- `picks.json`（`{item_id: [sid,...]}`）で自動選抜を上書き；`[]` は「Nadeshiko 無し」。
+- token 検証の原則（誤命中を語料にしない）：
+  - 汎用は **token 完全一致/辞書形一致**；カタカナ・読みの表記ゆれは正規化して照合；
+  - 補助動詞は inflection label（attempt〜てみる 等）か、複合動詞表面＋`d != 本体`；
+  - 接続助詞（が・から・のに・けれど…）は**用言（動詞・形容詞・形状詞・助動詞）の後続**のみ；
+  - 形式名詞・指示詞・和語動詞は data 側 `match` regex（誤命中ガード済み）を再利用；
+  - 既知の不採用例：〜が早いか←「のが早いか」、〜につけ←「煮付け」、〜もので←「もので（手段）」、
+    〜ものを←目的語の「ものを」、て-setsuzoku 等の汎用すぎる語。
+- 語料紅線（§6）は Nadeshiko にも適用：**台詞は照原样引用**（表記不改写）。
+- 現在の覆盖：447 条目中 **432 条目・860 段**（ヒット無し/汎用すぎる語は未収録）。
 
 ## 4. 版权
 
